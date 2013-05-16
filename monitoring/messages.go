@@ -26,7 +26,7 @@ type Metric struct {
 
 type MetricGroup struct {
 	Prefix  string
-	Metrics map[string]Metric
+	Metrics map[string]*Metric
 }
 
 type CheckMetricsPostParams struct {
