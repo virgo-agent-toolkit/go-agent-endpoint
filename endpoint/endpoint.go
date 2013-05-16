@@ -44,9 +44,9 @@ func getErr(err error) Error {
 	return Error{Message: err.Error()}
 }
 
-type handler func(*request, *json.Encoder, *json.Decoder)
+type Handler func(*request, *json.Encoder, *json.Decoder)
 
-type endpoint map[string]handler
+type endpoint map[string]Handler
 
 func (e endpoint) ServeConn(conn net.Conn, wg *sync.WaitGroup) {
 	encoder := json.NewEncoder(conn)

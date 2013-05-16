@@ -1,16 +1,24 @@
 package endpoint
 
 import (
+	"errors"
 	"net"
 	"sync"
 )
 
+var (
+	ServerAlreadyStarted = errors.New("Server is already started; can't bind more handlers")
+	DuplicateMethod      = errors.New("A handler with this method name already exists")
+)
+
 type Server struct {
-	ep   endpoint
-	ln   net.Listener
-	stop chan int
-	wg   *sync.WaitGroup
-	once sync.Once
+	ep endpoint
+	ln net.Listener
+
+	stop    chan int
+	wg      *sync.WaitGroup
+	once    sync.Once
+	running bool
 
 	agents map[string]*agent
 }
@@ -26,11 +34,11 @@ func NewServer(laddr string) (server *Server, err error) {
 
 func (s *Server) Start() {
 	go s.once.Do(func() {
-		run := true
-		for run {
+		s.running = true
+		for s.running {
 			select {
 			case <-s.stop:
-				run = false
+				s.running = false
 			default:
 				conn, err := s.ln.Accept()
 				if err == nil {
@@ -51,4 +59,15 @@ func (s *Server) Destroy() {
 func (s *Server) bind() {
 	s.ep["handshake.hello"] = s.handleHandshakeHello
 	s.ep["heartbeat.post"] = s.handleHeartbeat
+}
+
+func (s *Server) Bind(method string, handler Handler) error {
+	if s.running {
+		return ServerAlreadyStarted
+	}
+	if _, ok := s.ep[method]; ok {
+		return DuplicateMethod
+	}
+	s.ep[method] = handler
+	return nil
 }
