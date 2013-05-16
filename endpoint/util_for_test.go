@@ -35,7 +35,11 @@ func getFixture(name string) (fixture io.ReadCloser, err error) {
 
 func failIfError(t *testing.T, err error, operation string, args ...interface{}) {
 	if err != nil {
-		t.Errorf("Error in {%s}: %v\n%v\n", operation, err, args)
+		err_str := fmt.Sprintf("Error in {%s}: %v\n", operation, err)
+		for _, arg := range args {
+			err_str = err_str + fmt.Sprintf("%v\n", arg)
+		}
+		t.Error(err_str)
 	}
 }
 

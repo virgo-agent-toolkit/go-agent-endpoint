@@ -12,7 +12,7 @@ func (s *Server) handleHeartbeat(req *request, encoder *json.Encoder, decoder *j
 	if err != nil {
 		rsp.Err = getErr(err)
 	} else {
-		logger.Printf("Got a timestamp: %v\n", hb.Timestamp)
+		//logger.Printf("Got a timestamp: %v\n", hb.Timestamp)
 		rsp.Result, _ = Heartbeat{Timestamp: time.Now()}.MarshalJSON()
 	}
 	encoder.Encode(rsp)

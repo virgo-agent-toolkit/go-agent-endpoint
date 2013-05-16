@@ -9,6 +9,7 @@ import (
 
 var (
 	UnmarshalFieldError = errors.New("Unmarshal field error")
+	NilPointer          = errors.New("Unmarshal function called on a nil pointer")
 )
 
 type Heartbeat struct {
@@ -20,6 +21,9 @@ func (h Heartbeat) MarshalJSON() ([]byte, error) {
 }
 
 func (h *Heartbeat) UnmarshalJSON(data []byte) error {
+	if h == nil {
+		return NilPointer
+	}
 	var tmp map[string]float64
 	err := json.Unmarshal(data, &tmp)
 	if err != nil {
@@ -87,6 +91,9 @@ func (g MetricGroup) MarshalJSON() (js []byte, err error) {
 }
 
 func (g *MetricGroup) UnmarshalJSON(data []byte) error {
+	if g == nil {
+		return NilPointer
+	}
 	var tmp []json.RawMessage
 	err := json.Unmarshal(data, &tmp)
 	if err != nil {
@@ -96,7 +103,7 @@ func (g *MetricGroup) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		return UnmarshalFieldError
 	}
-	err = json.Unmarshal(tmp[1], g.Metrics)
+	err = json.Unmarshal(tmp[1], &g.Metrics)
 	if err != nil {
 		return UnmarshalFieldError
 	}
