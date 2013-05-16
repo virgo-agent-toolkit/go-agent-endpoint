@@ -17,7 +17,7 @@ type request struct {
 	Id      int             `json:"id"`
 	Target  string          `json:"target"`
 	Source  string          `json:"source"`
-	Params  json.RawMessage `json:"params"`
+	Params  json.RawMessage `json:"params"` // left intact for handles to deal with
 	Method  string          `json:"method"`
 }
 

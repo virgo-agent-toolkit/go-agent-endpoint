@@ -1,11 +1,8 @@
 package endpoint
 
 import (
-	"encoding/json"
-	"fmt"
 	"net"
 	"sync"
-	"time"
 )
 
 type Server struct {
@@ -14,6 +11,8 @@ type Server struct {
 	stop chan int
 	wg   *sync.WaitGroup
 	once sync.Once
+
+	agents map[string]*agent
 }
 
 func NewServer(laddr string) (server *Server, err error) {
@@ -50,18 +49,6 @@ func (s *Server) Destroy() {
 }
 
 func (s *Server) bind() {
-	s.ep["heartbeat.post"] = s.serveHeartbeat
-}
-
-func (e *Server) serveHeartbeat(req *request, encoder *json.Encoder, decoder *json.Decoder) {
-	rsp := respondingTo(req)
-	var hb Heartbeat
-	err := json.Unmarshal(req.Params, &hb)
-	if err != nil {
-		rsp.Err = getErr(err)
-	} else {
-		fmt.Printf("Got a timestamp: %v\n", hb.Timestamp)
-		rsp.Result, _ = Heartbeat{Timestamp: time.Now()}.MarshalJSON()
-	}
-	encoder.Encode(rsp)
+	s.ep["handshake.hello"] = s.handleHandshakeHello
+	s.ep["heartbeat.post"] = s.handleHeartbeat
 }
