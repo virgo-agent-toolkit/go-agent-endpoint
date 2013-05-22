@@ -27,7 +27,7 @@ sudo -u vagrant bash -c 'source /data/O_O/conf/rc; go get -u launchpad.net/goche
 #     2. The only thing here that matters is the SHA1. This could prevent hacking and commiting from submodule
 rm -rf /data/virgo
 cd /data/gopath/src/github.com/racker/go-agent-endpoint
-sha1=$(git submodule status | grep 'testing/virgo' | awk '{print $1}') | sed 's/^-//g'
+sha1=$(git submodule status | grep 'testing/virgo' | awk '{print $1}' | sed 's/^[-+]//g')
 git clone git://github.com/racker/virgo /data/virgo
 cd /data/virgo
 git checkout $sha1
