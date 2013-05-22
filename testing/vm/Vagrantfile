@@ -89,7 +89,6 @@ Vagrant::Config.run do |config|
 
   config.vm.provision :shell, :path => "provision.sh"
   
-  config.vm.share_folder("endpoint", "/data/gopath/src/github.com/racker/go-agent-endpoint", "..", :nfs => true) # If this line is commented out, `reload` succeeds; otherwise it complains about "Mounting NFS shared folders failed..." and is not mounted. Other two are monted well.
-  config.vm.share_folder("virgo", "/data/virgo", "../../virgo", :nfs => true)
+  config.vm.share_folder("endpoint", "/data/gopath/src/github.com/racker/go-agent-endpoint", "../..", :nfs => true) # If this line is commented out, `reload` succeeds; otherwise it complains about "Mounting NFS shared folders failed..." and is not mounted. Other two are monted well.
 
 end

@@ -1,0 +1,3 @@
+[submodule "testing/virgo"]
+	path = testing/virgo
+	url = git://github.com/racker/virgo.git

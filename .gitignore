@@ -22,5 +22,5 @@ _testmain.go
 *.exe
 
 go-agent-endpoint
-virgovm/O_O/go
-virgovm/.vagrant
+testing/vm/O_O/go
+testing/vm/.vagrant

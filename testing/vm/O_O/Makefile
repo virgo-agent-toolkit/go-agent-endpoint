@@ -9,7 +9,7 @@ integration:
 test_agent:
 	@echo
 	@echo -------------------------   Testing  agent   -------------------------
-	(cd $(VIRGO_DIR); make test)
+	cd $(VIRGO_DIR) && ./configure && make test
 	@echo
 
 test_server: test_endpoint test_monitoring
@@ -17,11 +17,11 @@ test_server: test_endpoint test_monitoring
 test_endpoint:
 	@echo
 	@echo -------------------------  Testing endpoint  -------------------------
-	(cd $(ENDPOINT_PKG); go test)
+	cd $(ENDPOINT_PKG) && go test
 	@echo
 
 test_monitoring:
 	@echo
 	@echo ------------------------- Testing monitoring -------------------------
-	(cd $(MONITORING_PKG); go test)
+	cd $(MONITORING_PKG) && go test
 	@echo
