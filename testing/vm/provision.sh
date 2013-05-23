@@ -13,7 +13,7 @@ mkdir -p /data/O_O
 mount --bind /data/gopath/src/github.com/racker/go-agent-endpoint/testing/vm/O_O /data/O_O
 
 if [ ! -d "/data/O_O/go" ]; then
-  (cd /data/O_O && curl 'https://go.googlecode.com/files/go1.1.linux-amd64.tar.gz' | tar zxv)
+  (cd /data/O_O && curl -q 'https://go.googlecode.com/files/go1.1.linux-amd64.tar.gz' | tar zxv)
 fi
 
 cp /data/O_O/conf/profile /home/vagrant/.profile
