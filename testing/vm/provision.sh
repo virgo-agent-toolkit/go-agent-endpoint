@@ -1,13 +1,13 @@
 #!/bin/bash
 
-apt-get -qq -y update
-apt-get -qq -y install vim curl git bzr make g++ gcc
+# apt-get -qq -y update
+# apt-get -qq -y install vim curl git bzr make g++ gcc
 
 
-chown vagrant:vagrant /data/gopath
-chown vagrant:vagrant /data/gopath/src
-chown vagrant:vagrant /data/gopath/src/github.com
-chown vagrant:vagrant /data/gopath/src/github.com/racker
+# chown vagrant:vagrant /data/gopath
+# chown vagrant:vagrant /data/gopath/src
+# chown vagrant:vagrant /data/gopath/src/github.com
+# chown vagrant:vagrant /data/gopath/src/github.com/racker
 
 mkdir -p /data/O_O
 mount --bind /data/gopath/src/github.com/racker/go-agent-endpoint/testing/vm/O_O /data/O_O
