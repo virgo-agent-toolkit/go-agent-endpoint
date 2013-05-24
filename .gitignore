@@ -24,3 +24,4 @@ _testmain.go
 go-agent-endpoint
 testing/vm/O_O/go
 testing/vm/.vagrant
+*.pem

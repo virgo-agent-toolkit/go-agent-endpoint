@@ -14,11 +14,11 @@ monitoring_id agentA
 monitoring_token 0000000000000000000000000000000000000000000000000000000000000000.7777
 monitoring_endpoints 127.0.0.1:50051
 ' > /tmp/cfg
-$agent_out/rackspace-monitoring-agent -i --zip $agent_out/virgo-bundle.zip --config /tmp/cfg 1>/dev/null 2>&1 &
+$agent_out/rackspace-monitoring-agent -i --zip $agent_out/virgo-bundle.zip --config /tmp/cfg &
 agent_pid=$!
 
 sleep 5
 
+kill $agent_pid
 kill $stud_pid
 kill $endpoint_pid
-kill $agent_pid

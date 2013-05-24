@@ -9,7 +9,7 @@ default:
 integration: build_endpoint_bin build_agent
 	@echo
 	@echo -------------------------  Integration Test  -------------------------
-	/data/O_O/integration/test.sh $(GO_AGENT_ENDPOINT_PKG)/go-agent-endpoint $(VIRGO_DIR)/out/Debug
+	integration/test.sh $(GO_AGENT_ENDPOINT_PKG)/go-agent-endpoint $(VIRGO_DIR)/out/Debug
 
 build_endpoint_bin:
 	cd $(GO_AGENT_ENDPOINT_PKG) && go build
