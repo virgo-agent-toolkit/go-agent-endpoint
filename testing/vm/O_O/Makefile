@@ -1,15 +1,29 @@
 VIRGO_DIR=/data/virgo
+GO_AGENT_ENDPOINT_PKG=/data/gopath/src/github.com/racker/go-agent-endpoint
 ENDPOINT_PKG=/data/gopath/src/github.com/racker/go-agent-endpoint/endpoint
 MONITORING_PKG=/data/gopath/src/github.com/racker/go-agent-endpoint/monitoring
 
-integration:
-	@echo integration test not implemented...
-	@echo try individual tests: \`make test_agent\` or \`make test_server\`
+default:
+	@echo Target: integration test_agent test_server
 
-test_agent:
+integration: build_endpoint_bin build_agent
+	@echo
+	@echo -------------------------  Integration Test  -------------------------
+	/data/O_O/integration/test.sh $(GO_AGENT_ENDPOINT_PKG)/go-agent-endpoint $(VIRGO_DIR)/out/Debug
+
+build_endpoint_bin:
+	cd $(GO_AGENT_ENDPOINT_PKG) && go build
+
+test_agent: build_agent
 	@echo
 	@echo -------------------------   Testing  agent   -------------------------
-	cd $(VIRGO_DIR) && ./configure && make test
+	cd $(VIRGO_DIR) && make test
+	@echo
+
+build_agent:
+	@echo
+	@echo -------------------------   Building agent   -------------------------
+	cd $(VIRGO_DIR) && ./configure && make
 	@echo
 
 test_server: test_endpoint test_monitoring

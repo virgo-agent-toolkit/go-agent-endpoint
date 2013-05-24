@@ -1,6 +1,6 @@
 test: vm_is_up
 	cd testing/vm && vagrant ssh -c 'cd /data/O_O && make test_server'
-	cd testing/vm && vagrant ssh -c 'cd /data/O_O && make test_agent'
+	cd testing/vm && vagrant ssh -c 'cd /data/O_O && make integration'
 
 ssh: vm_is_up
 	cd testing/vm && vagrant ssh

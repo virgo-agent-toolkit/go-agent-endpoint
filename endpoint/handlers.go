@@ -2,6 +2,7 @@ package endpoint
 
 import (
 	"encoding/json"
+	"fmt"
 	"time"
 )
 
@@ -19,4 +20,14 @@ func (s *Server) handleHeartbeat(req *request, encoder *json.Encoder, decoder *j
 }
 
 func (s *Server) handleHandshakeHello(req *request, encoder *json.Encoder, decoder *json.Decoder) {
+	rsp := respondingTo(req)
+	var hl HelloParams
+	err := json.Unmarshal(req.Params, &hl)
+	if err != nil {
+		rsp.Err = getErr(err)
+	} else {
+		fmt.Printf("got a handshake.hello from %s\n", req.Source)
+		rsp.Result, _ = json.Marshal(HelloResult{HeartbeatInterval: "1000"})
+	}
+	encoder.Encode(rsp)
 }

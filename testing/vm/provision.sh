@@ -1,7 +1,7 @@
 #!/bin/bash
 
 apt-get -qq -y update
-apt-get -qq -y install vim curl git bzr make g++ gcc
+apt-get -qq -y install vim curl git bzr make g++ gcc stud
 
 
 chown vagrant:vagrant /data/gopath
