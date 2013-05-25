@@ -1,6 +1,6 @@
 export GOROOT=/data/O_O/go
 export GOPATH=/data/gopath
-export GOBIN=$GOPATH/bin/linux-amd64
+export GOBIN=$GOPATH/bin
 export PATH=$PATH:$GOROOT/bin:$GOBIN
 
 export PATH=/data/O_O/bin:$PATH
