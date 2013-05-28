@@ -42,6 +42,13 @@ exec { "install_colorgo":
   user => "vagrant",
 }
 
+exec { "install_pingpong":
+  command => "/data/O_O/go/bin/go get -u github.com/songgao/pingpong",
+  environment => $GO_ENV,
+  require => [ File['/data/gopath/src/github.com'], File['/home/vagrant/.profile'], Exec['O_O'] ],
+  user => "vagrant",
+}
+
 file { '/home/vagrant/.profile':
   ensure => file,
   content => template('/vagrant/manifests/templates/profile.erb'),
