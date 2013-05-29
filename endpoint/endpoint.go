@@ -33,15 +33,15 @@ type response struct {
 	Target  string          `json:"target"`
 	Source  string          `json:"source"`
 	Result  json.RawMessage `json:"result"`
-	Err     Error           `json:"error"`
+	Err     *Error          `json:"error"`
 }
 
 func respondingTo(req *request) *response {
-	return &response{Version: VERSION, Id: req.Id, Target: req.Source, Source: req.Target, Result: json.RawMessage("{}")}
+	return &response{Version: VERSION, Id: req.Id, Target: req.Source, Source: req.Target, Result: json.RawMessage("{}"), Err: nil}
 }
 
-func getErr(err error) Error {
-	return Error{Message: err.Error()}
+func getErr(err error) *Error {
+	return &Error{Message: err.Error()}
 }
 
 type Handler func(*request, *json.Encoder, *json.Decoder)
