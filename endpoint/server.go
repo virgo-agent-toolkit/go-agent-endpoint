@@ -86,10 +86,10 @@ func (s *Server) serveConn(conn net.Conn, wg *sync.WaitGroup) {
 	if err != nil {
 		return
 	}
-	first, err := reader.Peek(16)
-	for first[0] == ' ' || first[0] == '\r' || first[0] == '\n' || first[0] == '\t' {
+	first, err := reader.Peek(1)
+	for err == nil && (first[0] == ' ' || first[0] == '\t' || first[0] == '\n' || first[0] == '\r') {
 		reader.ReadByte()
-		first, err = reader.Peek(16)
+		first, err = reader.Peek(1)
 	}
 	if err != nil {
 		return
@@ -98,7 +98,7 @@ func (s *Server) serveConn(conn net.Conn, wg *sync.WaitGroup) {
 		// writing shouldn't be buffered
 		s.ep.ServeConn(newReadWriter(reader, conn))
 	} else {
-		logger.Printf("Got: %s\n", first)
+		logger.Printf("Got: %s; not a valid json, will pass to HTTP handler.\n", first)
 	}
 }
 
