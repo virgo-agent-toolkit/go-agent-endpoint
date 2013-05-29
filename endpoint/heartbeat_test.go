@@ -11,9 +11,7 @@ func (s *TestSuite) TestHeartbeat(c *gocheck.C) {
 	server.Start()
 
 	rsp_exp, rsp_test := simpleExpectingTest(c, endpoint_addr, FIXTURE_heartbeat_post_request, FIXTURE_heartbeat_post_response)
-	c.Assert(rsp_test["error"], gocheck.FitsTypeOf, map[string]interface{}{})
-	msg := rsp_test["error"].(map[string]interface{})["message"]
-	c.Assert(msg, gocheck.Equals, "")
+	c.Assert(rsp_test["error"], gocheck.IsNil)
 
 	assertEqualMapItem(c, rsp_exp, rsp_test, "v")
 	assertEqualMapItem(c, rsp_exp, rsp_test, "id")
@@ -22,7 +20,7 @@ func (s *TestSuite) TestHeartbeat(c *gocheck.C) {
 
 	rsp_exp, rsp_test = simpleExpectingTest(c, endpoint_addr, FIXTURE_heartbeat_post_request_invalid_version, FIXTURE_heartbeat_post_response)
 	c.Assert(rsp_test["error"], gocheck.FitsTypeOf, map[string]interface{}{})
-	msg = rsp_test["error"].(map[string]interface{})["message"]
+	msg := rsp_test["error"].(map[string]interface{})["message"]
 	c.Assert(msg, gocheck.NotNil)
 	c.Assert(msg, gocheck.Not(gocheck.Equals), "")
 	assertEqualMapItem(c, rsp_exp, rsp_test, "v")
