@@ -65,6 +65,7 @@ func (e endpoint) ServeConn(conn net.Conn, wg *sync.WaitGroup) {
 		if !ok {
 			rsp := respondingTo(req)
 			rsp.Err = getErr(NoSuchHandler)
+			logger.Printf("Got a request to unimplemented handler: %s\n", req.Method)
 			encoder.Encode(rsp)
 		} else {
 			handler(req, encoder, decoder)
