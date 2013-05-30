@@ -6,6 +6,7 @@ echo '
 monitoring_id agentA
 monitoring_token 0000000000000000000000000000000000000000000000000000000000000000.7777
 monitoring_endpoints 127.0.0.1:50051
+monitoring_upgrade false
 ' > /tmp/cfg
 
 cmd1="/usr/bin/stud -q $(dirname $0)/test.pem -b 127.0.0.1,50050 -f *,50051 --ssl --write-proxy"
