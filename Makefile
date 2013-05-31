@@ -5,6 +5,9 @@ test: vm_is_up
 ssh: vm_is_up
 	cd testing/vm && vagrant ssh
 
+halt:
+	cd testing/vm && vagrant halt
+
 clean: reload
 reload: vm_is_up
 	cd testing/vm && vagrant reload
