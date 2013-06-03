@@ -99,5 +99,6 @@ func (s *Server) serveConn(conn net.Conn, wg *sync.WaitGroup) {
 		s.ep.ServeConn(newReadWriter(reader, conn))
 	} else {
 		logger.Printf("Got: %s; not a valid json, will pass to HTTP handler.\n", first)
+		handleUpgrade(newReadWriter(reader, conn))
 	}
 }
