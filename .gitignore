@@ -26,3 +26,5 @@ testing/vm/O_O/go
 testing/vm/.vagrant
 *.pem
 testing/vm/O_O/logs
+.nfs*
+testing/vm/.vagrant.v1.*
