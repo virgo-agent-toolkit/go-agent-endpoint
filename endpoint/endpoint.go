@@ -45,13 +45,27 @@ func getErr(err error) *Error {
 
 type Handler func(*request, *json.Encoder, *json.Decoder)
 
-type endpoint map[string]Handler
+type endpoint struct {
+	Handlers map[string]Handler
+	ctrl     *controller
+}
+
+func newEndpoint(ctrl *controller) *endpoint {
+	ret := new(endpoint)
+	ret.ctrl = ctrl
+	ret.Handlers = make(map[string]Handler)
+	ret.Handlers["heartbeat.post"] = ret.handleHeartbeat
+	return ret
+}
 
 func (e endpoint) ServeConn(rw io.ReadWriter) {
-	var err error
+	if !e.authenticate(rw) {
+		return
+	}
+
 	encoder := json.NewEncoder(rw)
 	decoder := json.NewDecoder(rw)
-	for err == nil {
+	for {
 		req := new(request)
 		err := decoder.Decode(req)
 		if err != nil {
@@ -65,7 +79,7 @@ func (e endpoint) ServeConn(rw io.ReadWriter) {
 			rsp.Err = getErr(WrongVersion)
 			encoder.Encode(rsp)
 		} else {
-			handler, ok := e[req.Method]
+			handler, ok := e.Handlers[req.Method]
 			if !ok {
 				rsp := respondingTo(req)
 				rsp.Err = getErr(NoSuchHandler)
@@ -76,4 +90,39 @@ func (e endpoint) ServeConn(rw io.ReadWriter) {
 			}
 		}
 	}
+}
+
+func (e *endpoint) authenticate(rw io.ReadWriter) (authenticated bool) {
+	encoder := json.NewEncoder(rw)
+	decoder := json.NewDecoder(rw)
+	req := new(request)
+	err := decoder.Decode(req)
+	if err != nil {
+		return false
+	}
+	rsp := respondingTo(req)
+	defer encoder.Encode(rsp)
+	if req.Method != "handshake.hello" {
+		rsp.Err = getErr(AuthenticationFailed)
+		return false
+	}
+	if req.Version != VERSION {
+		rsp.Err = getErr(WrongVersion)
+		return false
+	}
+	var hl HelloParams
+	err = json.Unmarshal(req.Params, &hl)
+	if err != nil {
+		rsp.Err = getErr(err)
+		return false
+	}
+	logger.Printf("got a handshake.hello from %s\n", req.Source)
+	// TODO: check process version and bundleversion
+	if !e.ctrl.Authenticate(hl.AgentName, hl.AgentId, hl.Token) {
+		rsp.Err = getErr(AuthenticationFailed)
+		logger.Printf("handshake.hello from %s failed authentication\n", req.Source)
+		return false
+	}
+	rsp.Result, _ = json.Marshal(HelloResult{HeartbeatInterval: "1000"})
+	return true
 }

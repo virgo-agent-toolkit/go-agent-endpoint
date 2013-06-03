@@ -39,4 +39,21 @@ const (
     }
 }
 `
+
+	FIXTURE_handshake_hello_request = `
+  {
+    "v": "1",
+    "id": 0,
+    "source": "agentA",
+    "target": "endpoint",
+    "method": "handshake.hello",
+    "params": {
+      "token": "MYTOKEN",
+      "agent_id": "MYUID",
+      "agent_name": "Rackspace Monitoring Agent",
+      "process_version": "1.0.0",
+      "bundle_version": "1.0.0"
+    }
+  }
+`
 )
