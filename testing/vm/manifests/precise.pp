@@ -54,8 +54,7 @@ file { '/home/vagrant/.profile':
   content => template('/vagrant/manifests/templates/profile.erb'),
 }
 
-exec { "get_virgo":
-  command => '/vagrant/get_virgo.sh',
-  require => Package['git'],
+exec { "repo_init":
+  command => '/bin/bash -c "cd /data/gopath/src/github.com/racker/go-agent-endpoint && git submodule update --init --recursive"',
+  require => [ Package['git'] ],
 }
-

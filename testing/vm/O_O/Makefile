@@ -1,4 +1,4 @@
-VIRGO_DIR=/data/virgo
+VIRGO_DIR=/data/gopath/src/github.com/racker/go-agent-endpoint/testing/virgo
 GO_AGENT_ENDPOINT_PKG=/data/gopath/src/github.com/racker/go-agent-endpoint
 ENDPOINT_PKG=/data/gopath/src/github.com/racker/go-agent-endpoint/endpoint
 MONITORING_PKG=/data/gopath/src/github.com/racker/go-agent-endpoint/monitoring
