@@ -28,6 +28,13 @@ exec { "install_go":
 
 $GO_ENV = ["GOROOT=/data/O_O/go", "GOPATH=/data/gopath", "GOBIN=/data/gopath/bin"]
 
+exec { "install_proxyProtocol":
+  command => "/data/O_O/go/bin/go get -u github.com/racker/go-proxy-protocol",
+  environment => $GO_ENV,
+  require => [ File['/data/gopath/src/github.com/racker'], File['/home/vagrant/.profile'], Exec['O_O'] ],
+  user => "vagrant",
+}
+
 exec { "install_gocheck":
   command => "/data/O_O/go/bin/go get -u launchpad.net/gocheck",
   environment => $GO_ENV,

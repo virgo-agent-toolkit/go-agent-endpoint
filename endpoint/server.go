@@ -2,8 +2,8 @@ package endpoint
 
 import (
 	"bufio"
-	"bytes"
 	"errors"
+	"github.com/racker/go-proxy-protocol"
 	"net"
 	"net/http"
 	"sync"
@@ -82,7 +82,7 @@ func (s *Server) serveConn(conn net.Conn, wg *sync.WaitGroup) {
 	defer wg.Done()
 	var err error
 	reader := bufio.NewReader(conn)
-	err = s.consumePROXY(reader)
+	_, err = proxyProtocol.ConsumeProxyLine(reader)
 	if err != nil {
 		return
 	}
@@ -100,15 +100,4 @@ func (s *Server) serveConn(conn net.Conn, wg *sync.WaitGroup) {
 	} else {
 		logger.Printf("Got: %s; not a valid json, will pass to HTTP handler.\n", first)
 	}
-}
-
-func (s *Server) consumePROXY(reader *bufio.Reader) error {
-	word, err := reader.Peek(6)
-	if err != nil {
-		return err
-	}
-	if bytes.Equal(word, []byte("PROXY ")) {
-		reader.ReadSlice('\n')
-	}
-	return nil
 }
