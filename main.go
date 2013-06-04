@@ -17,7 +17,7 @@ func main() {
 		print_usage()
 		os.Exit(1)
 	}
-	server, err := endpoint.NewServer(os.Args[1])
+	server, err := endpoint.NewEndpoint(os.Args[1], endpoint.NewHub())
 	if err != nil {
 		print_usage()
 		log.Fatalln(err)

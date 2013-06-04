@@ -5,19 +5,27 @@ import (
 	"net"
 )
 
-func (s *TestSuite) TestHeartbeat(c *gocheck.C) {
-	endpoint_addr := "localhost:9876"
-	server, err := NewServer(endpoint_addr)
+func (s *TestSuite) init(c *gocheck.C, endpoint_addr string) (*Endpoint, net.Conn) {
+	hub := NewHub()
+	server, err := NewEndpoint(endpoint_addr, hub)
 	c.Assert(err, gocheck.IsNil)
+
 	server.Start()
 
 	conn, err := net.Dial("tcp", endpoint_addr)
 	c.Assert(err, gocheck.IsNil)
 
-	rsp_exp, rsp_test := simpleExpectingTest(c, conn, FIXTURE_handshake_hello_request, "{}")
+	_, rsp_test := simpleExpectingTest(c, conn, FIXTURE_handshake_hello_request, "{}")
 	c.Assert(rsp_test["error"], gocheck.IsNil)
 
-	rsp_exp, rsp_test = simpleExpectingTest(c, conn, FIXTURE_heartbeat_post_request, FIXTURE_heartbeat_post_response)
+	return server, conn
+}
+
+func (s *TestSuite) TestHeartbeat(c *gocheck.C) {
+	endpoint_addr := "localhost:9876"
+	server, conn := s.init(c, endpoint_addr)
+
+	rsp_exp, rsp_test := simpleExpectingTest(c, conn, FIXTURE_heartbeat_post_request, FIXTURE_heartbeat_post_response)
 	c.Assert(rsp_test["error"], gocheck.IsNil)
 
 	assertEqualMapItem(c, rsp_exp, rsp_test, "v")

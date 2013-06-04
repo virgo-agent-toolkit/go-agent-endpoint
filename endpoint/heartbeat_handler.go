@@ -5,7 +5,9 @@ import (
 	"time"
 )
 
-func (e *endpoint) handleHeartbeat(req *request, encoder *json.Encoder, decoder *json.Decoder) {
+type HeartbeatHandler byte
+
+func (h HeartbeatHandler) Handle(req *request, encoder *json.Encoder, decoder *json.Decoder) HandleCode {
 	rsp := respondingTo(req)
 	var hb Heartbeat
 	err := json.Unmarshal(req.Params, &hb)
@@ -17,4 +19,5 @@ func (e *endpoint) handleHeartbeat(req *request, encoder *json.Encoder, decoder 
 		rsp.Result, _ = Heartbeat{Timestamp: time.Now()}.MarshalJSON()
 	}
 	encoder.Encode(rsp)
+	return OK_PASSON
 }

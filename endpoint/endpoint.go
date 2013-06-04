@@ -1,128 +1,84 @@
 package endpoint
 
 import (
-	"encoding/json"
+	"bufio"
 	"errors"
-	"io"
+	"github.com/racker/go-proxy-protocol"
+	"net"
+	"sync"
 )
 
 var (
-	NoSuchHandler = errors.New("No such handler")
-	WrongVersion  = errors.New("Wrong protocol version")
+	ServerAlreadyStarted = errors.New("Server is already started; can't bind more handlers")
+	DuplicateMethod      = errors.New("A handler with this method name already exists")
+	AuthenticationFailed = errors.New("Authentication failed")
 )
 
-type request struct {
-	Version string          `json:"v"`
-	Id      int             `json:"id"`
-	Target  string          `json:"target"`
-	Source  string          `json:"source"`
-	Params  json.RawMessage `json:"params"` // left intact for handles to deal with
-	Method  string          `json:"method"`
+type Endpoint struct {
+	hub *Hub
+	ln  net.Listener
+
+	stop    chan int
+	wg      *sync.WaitGroup
+	once    sync.Once
+	running bool
 }
 
-type Error struct {
-	Field   string `json:"field"`
-	Code    int    `json:"code"`
-	Message string `json:"message"`
+func NewEndpoint(laddr string, hub *Hub) (endpoint *Endpoint, err error) {
+	endpoint = new(Endpoint)
+	endpoint.wg = new(sync.WaitGroup)
+	endpoint.stop = make(chan int, 1)
+	endpoint.ln, err = net.Listen("tcp", laddr)
+	endpoint.hub = hub
+	return
 }
 
-type response struct {
-	Version string          `json:"v"`
-	Id      int             `json:"id"`
-	Target  string          `json:"target"`
-	Source  string          `json:"source"`
-	Result  json.RawMessage `json:"result"`
-	Err     *Error          `json:"error"`
+func (e *Endpoint) Start() {
+	go e.once.Do(func() {
+		e.running = true
+		for e.running {
+			select {
+			case <-e.stop:
+				e.running = false
+			default:
+				conn, err := e.ln.Accept()
+				if err == nil {
+					e.wg.Add(1)
+					go e.serveConn(conn, e.wg)
+				}
+			}
+		}
+	})
 }
 
-func respondingTo(req *request) *response {
-	return &response{Version: VERSION, Id: req.Id, Target: req.Source, Source: req.Target, Result: json.RawMessage("{}"), Err: nil}
+func (e *Endpoint) Destroy() {
+	e.stop <- 1
+	e.ln.Close()
+	e.wg.Wait()
 }
 
-func getErr(err error) *Error {
-	return &Error{Message: err.Error()}
-}
-
-type Handler func(*request, *json.Encoder, *json.Decoder)
-
-type endpoint struct {
-	Handlers map[string]Handler
-	ctrl     *controller
-}
-
-func newEndpoint(ctrl *controller) *endpoint {
-	ret := new(endpoint)
-	ret.ctrl = ctrl
-	ret.Handlers = make(map[string]Handler)
-	ret.Handlers["heartbeat.post"] = ret.handleHeartbeat
-	return ret
-}
-
-func (e endpoint) ServeConn(rw io.ReadWriter) {
-	if !e.authenticate(rw) {
+func (e *Endpoint) serveConn(conn net.Conn, wg *sync.WaitGroup) {
+	defer conn.Close()
+	defer wg.Done()
+	var err error
+	reader := bufio.NewReader(conn)
+	_, err = proxyProtocol.ConsumeProxyLine(reader)
+	if err != nil {
 		return
 	}
-
-	encoder := json.NewEncoder(rw)
-	decoder := json.NewDecoder(rw)
-	for {
-		req := new(request)
-		err := decoder.Decode(req)
-		if err != nil {
-			if err != io.EOF {
-				logger.Printf("Decoding error: %v\n", err)
-			}
-			break
-		}
-		if req.Version != VERSION {
-			rsp := respondingTo(req)
-			rsp.Err = getErr(WrongVersion)
-			encoder.Encode(rsp)
-		} else {
-			handler, ok := e.Handlers[req.Method]
-			if !ok {
-				rsp := respondingTo(req)
-				rsp.Err = getErr(NoSuchHandler)
-				logger.Printf("Got a request to unimplemented handler: %s\n", req.Method)
-				encoder.Encode(rsp)
-			} else {
-				handler(req, encoder, decoder)
-			}
-		}
+	first, err := reader.Peek(1)
+	for err == nil && (first[0] == ' ' || first[0] == '\t' || first[0] == '\n' || first[0] == '\r') {
+		reader.ReadByte()
+		first, err = reader.Peek(1)
 	}
-}
-
-func (e *endpoint) authenticate(rw io.ReadWriter) (authenticated bool) {
-	encoder := json.NewEncoder(rw)
-	decoder := json.NewDecoder(rw)
-	req := new(request)
-	err := decoder.Decode(req)
 	if err != nil {
-		return false
+		return
 	}
-	rsp := respondingTo(req)
-	defer encoder.Encode(rsp)
-	if req.Method != "handshake.hello" {
-		rsp.Err = getErr(AuthenticationFailed)
-		return false
+	if first[0] == '{' {
+		// writing shouldn't be buffered
+		e.hub.serveConn(newReadWriter(reader, conn))
+	} else {
+		logger.Printf("Got: %s; not a valid json, will pass to HTTP handler.\n", first)
+		handleUpgrade(newReadWriter(reader, conn))
 	}
-	if req.Version != VERSION {
-		rsp.Err = getErr(WrongVersion)
-		return false
-	}
-	var hl HelloParams
-	err = json.Unmarshal(req.Params, &hl)
-	if err != nil {
-		rsp.Err = getErr(err)
-		return false
-	}
-	logger.Printf("got a handshake.hello from %s\n", req.Source)
-	// TODO: check process version and bundleversion
-	if !e.ctrl.Authenticate(hl.AgentName, hl.AgentId, hl.Token) {
-		rsp.Err = getErr(AuthenticationFailed)
-		logger.Printf("handshake.hello from %s failed authentication\n", req.Source)
-		return false
-	}
-	rsp.Result, _ = json.Marshal(HelloResult{HeartbeatInterval: "1000"})
-	return true
 }
