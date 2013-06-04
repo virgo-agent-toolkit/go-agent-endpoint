@@ -9,7 +9,7 @@ default:
 integration: build_endpoint_bin build_agent integration/test.pem
 	@echo
 	@echo -------------------------  Integration Test  -------------------------
-	integration/test.sh $(GO_AGENT_ENDPOINT_PKG)/go-agent-endpoint $(VIRGO_DIR)/out/Debug
+	integration/test.sh $(GO_AGENT_ENDPOINT_PKG)/go-agent-endpoint $(VIRGO_DIR)/out/Debug $(GO_AGENT_ENDPOINT_PKG)/monitoring/monitoring
 
 integration/test.pem:
 	openssl req -x509 -newkey rsa:2048 -keyout /tmp/key.pem -out /tmp/cert.pem -days 3653 -nodes -subj '/C=/ST=/L=/O=/OU=/CN=/emailAddress=email@example.com'
@@ -17,6 +17,7 @@ integration/test.pem:
 
 build_endpoint_bin:
 	cd $(GO_AGENT_ENDPOINT_PKG) && go build
+	cd $(GO_AGENT_ENDPOINT_PKG)/monitoring && go build
 
 test_agent: build_agent
 	@echo

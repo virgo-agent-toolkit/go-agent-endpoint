@@ -9,15 +9,15 @@ import (
 )
 
 func print_usage() {
-	fmt.Printf("Usage: %s laddr\n", os.Args[0])
+	fmt.Printf("Usage: %s laddr controllerHost\n", os.Args[0])
 }
 
 func main() {
-	if len(os.Args) < 2 {
+	if len(os.Args) < 3 {
 		print_usage()
 		os.Exit(1)
 	}
-	server, err := endpoint.NewServer(os.Args[1])
+	server, err := endpoint.NewServer(os.Args[1], os.Args[2])
 	if err != nil {
 		print_usage()
 		log.Fatalln(err)

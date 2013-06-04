@@ -25,12 +25,12 @@ type Server struct {
 	running bool
 }
 
-func NewServer(laddr string) (server *Server, err error) {
+func NewServer(laddr string, controllerHost string) (server *Server, err error) {
 	server = new(Server)
 	server.wg = new(sync.WaitGroup)
 	server.stop = make(chan int, 1)
 	server.ln, err = net.Listen("tcp", laddr)
-	server.ctrl = new(controller)
+	server.ctrl = newController(controllerHost)
 	server.ep = newEndpoint(server.ctrl)
 	return
 }

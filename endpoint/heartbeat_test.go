@@ -3,11 +3,22 @@ package endpoint
 import (
 	"launchpad.net/gocheck"
 	"net"
+	"net/http"
 )
+
+func fake_auth(ctrlHost string) {
+	mux := http.NewServeMux()
+	mux.HandleFunc(CONTROLLER_API_AUTH, func(rspW http.ResponseWriter, req *http.Request) {
+		rspW.WriteHeader(200)
+	})
+	http.ListenAndServe(ctrlHost, mux)
+}
 
 func (s *TestSuite) TestHeartbeat(c *gocheck.C) {
 	endpoint_addr := "localhost:9876"
-	server, err := NewServer(endpoint_addr)
+	ctrl_host := "localhost:8988"
+	go fake_auth(ctrl_host)
+	server, err := NewServer(endpoint_addr, ctrl_host)
 	c.Assert(err, gocheck.IsNil)
 	server.Start()
 
