@@ -19,5 +19,5 @@ func (h HeartbeatHandler) Handle(req *request, encoder *json.Encoder, decoder *j
 		rsp.Result, _ = Heartbeat{Timestamp: time.Now()}.MarshalJSON()
 	}
 	encoder.Encode(rsp)
-	return OK_PASSON
+	return OK
 }

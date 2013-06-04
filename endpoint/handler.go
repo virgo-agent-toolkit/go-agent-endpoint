@@ -8,19 +8,9 @@ import (
 type HandleCode int
 
 const (
-	OK          = HandleCode(0x01)
-	OK_PASSON   = HandleCode(0x00)
-	FAIL        = HandleCode(0x11)
-	FAIL_PASSON = HandleCode(0x10)
+	OK   = HandleCode(0x0)
+	FAIL = HandleCode(0x1)
 )
-
-func (code HandleCode) IsOK() bool {
-	return 0x0 == code&0x10
-}
-
-func (code HandleCode) IsPASSON() bool {
-	return 0x0 == code&0x1
-}
 
 type Handler interface {
 	Handle(*request, *json.Encoder, *json.Decoder) HandleCode
@@ -61,10 +51,10 @@ func (hl *handlerList) Push(x handlerListItem) {
 
 func (l *handlerList) Iterate(req *request, enc *json.Encoder, dec *json.Decoder) HandleCode {
 	hl := *l
-	ret := FAIL_PASSON
+	ret := FAIL
 	for _, item := range hl {
 		ret = item.handler.Handle(req, enc, dec)
-		if !ret.IsPASSON() {
+		if OK == ret {
 			break
 		}
 	}

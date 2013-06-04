@@ -5,15 +5,7 @@ import (
 )
 
 type Authenticator interface {
-	Authenticate(agentName string, agentId string, token string) bool
-}
-
-func authForIterator(auth Authenticator, agentName string, agentId string, token string) HandleCode {
-	if auth.Authenticate(agentName, agentId, token) {
-		return OK
-	} else {
-		return FAIL_PASSON
-	}
+	Authenticate(agentName string, agentId string, token string) HandleCode
 }
 
 type authenticatorListItem struct {
@@ -49,14 +41,14 @@ func (l *authenticatorList) Push(x authenticatorListItem) {
 	sort.Sort(l)
 }
 
-func (l *authenticatorList) Iterate(agentName string, agentId string, token string) bool {
+func (l *authenticatorList) Iterate(agentName string, agentId string, token string) HandleCode {
 	al := *l
-	ret := FAIL_PASSON
+	ret := FAIL
 	for _, item := range al {
-		ret = authForIterator(item.authenticator, agentName, agentId, token)
-		if !ret.IsPASSON() {
+		ret = item.authenticator.Authenticate(agentName, agentId, token)
+		if OK == ret {
 			break
 		}
 	}
-	return ret.IsOK()
+	return ret
 }

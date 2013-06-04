@@ -13,7 +13,6 @@ type Hub struct {
 func NewHub() *Hub {
 	ret := new(Hub)
 	ret.authenticators = newAuthenticatorList()
-	ret.authenticators.Push(constructAuthenticatorListItem(dumbAuthenticator(0), 0))
 	ret.handlers = make(map[string]*handlerList)
 	ret.Hook("heartbeat.post", HeartbeatHandler(0), 0)
 	return ret
@@ -90,7 +89,7 @@ func (h *Hub) authenticate(rw io.ReadWriter) (authenticated bool) {
 	}
 	logger.Printf("got a handshake.hello from %s\n", req.Source)
 	// TODO: check process version and bundleversion
-	if !h.authenticators.Iterate(hl.AgentName, hl.AgentId, hl.Token) {
+	if OK != h.authenticators.Iterate(hl.AgentName, hl.AgentId, hl.Token) {
 		rsp.Err = getErr(AuthenticationFailed)
 		logger.Printf("handshake.hello from %s failed authentication\n", req.Source)
 		return false
