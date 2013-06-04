@@ -5,35 +5,33 @@ import (
 	"errors"
 	"github.com/racker/go-proxy-protocol"
 	"net"
-	"net/http"
 	"sync"
 )
 
 var (
 	ServerAlreadyStarted = errors.New("Server is already started; can't bind more handlers")
 	DuplicateMethod      = errors.New("A handler with this method name already exists")
+	AuthenticationFailed = errors.New("Authentication failed")
 )
 
 type Server struct {
-	ep          endpoint
-	ln          net.Listener
-	httpHandler http.Handler
+	ep   *endpoint
+	ctrl *controller
+	ln   net.Listener
 
 	stop    chan int
 	wg      *sync.WaitGroup
 	once    sync.Once
 	running bool
-
-	agents map[string]*agent
 }
 
 func NewServer(laddr string) (server *Server, err error) {
-	server = &Server{ep: make(endpoint)}
+	server = new(Server)
 	server.wg = new(sync.WaitGroup)
 	server.stop = make(chan int, 1)
 	server.ln, err = net.Listen("tcp", laddr)
-	server.bind()
-	server.httpHandler = http.NotFoundHandler()
+	server.ctrl = new(controller)
+	server.ep = newEndpoint(server.ctrl)
 	return
 }
 
@@ -61,19 +59,14 @@ func (s *Server) Destroy() {
 	s.wg.Wait()
 }
 
-func (s *Server) bind() {
-	s.ep["handshake.hello"] = s.handleHandshakeHello
-	s.ep["heartbeat.post"] = s.handleHeartbeat
-}
-
 func (s *Server) Bind(method string, handler Handler) error {
 	if s.running {
 		return ServerAlreadyStarted
 	}
-	if _, ok := s.ep[method]; ok {
+	if _, ok := s.ep.Handlers[method]; ok {
 		return DuplicateMethod
 	}
-	s.ep[method] = handler
+	s.ep.Handlers[method] = handler
 	return nil
 }
 
