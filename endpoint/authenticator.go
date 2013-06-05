@@ -1,7 +1,12 @@
 package endpoint
 
 import (
+	"errors"
 	"sort"
+)
+
+var (
+	AuthenticationFailed = errors.New("Authentication failed")
 )
 
 type Authenticator interface {

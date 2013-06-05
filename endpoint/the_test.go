@@ -8,7 +8,13 @@ import (
 func (s *TestSuite) init(c *gocheck.C, endpoint_addr string) (*Endpoint, net.Conn) {
 	hub := NewHub()
 	hub.Authenticator(dumbAuthenticator(0), 0)
-	server, err := NewEndpoint(endpoint_addr, hub)
+
+	config := EndpointConfig{}
+	config.Hub = hub
+	config.ListenAddr = endpoint_addr
+	config.UpgradingFileServerAddr = "localhost:8080"
+
+	server, err := NewEndpoint(config)
 	c.Assert(err, gocheck.IsNil)
 
 	server.Start()
