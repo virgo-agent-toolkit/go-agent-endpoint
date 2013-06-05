@@ -1,7 +1,7 @@
 package endpoint
 
-type dumbAuthenticator byte
+type DumbAuthenticatorDontUseMe byte
 
-func (auth dumbAuthenticator) Authenticate(agentName string, agentId string, token string, connCtx ConnContext) HandleCode {
+func (auth DumbAuthenticatorDontUseMe) Authenticate(agentName string, agentId string, token string, connCtx ConnContext) HandleCode {
 	return OK
 }

@@ -7,7 +7,7 @@ import (
 
 func (s *TestSuite) init(c *gocheck.C, endpoint_addr string) (*Endpoint, net.Conn) {
 	hub := NewHub()
-	hub.Authenticator(dumbAuthenticator(0), 0)
+	hub.Authenticator(DumbAuthenticatorDontUseMe(0), 0)
 
 	config := EndpointConfig{}
 	config.Hub = hub
