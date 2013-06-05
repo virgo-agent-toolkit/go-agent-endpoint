@@ -13,7 +13,7 @@ const (
 )
 
 type Handler interface {
-	Handle(*request, *json.Encoder, *json.Decoder) HandleCode
+	Handle(*request, *json.Encoder, ConnContext) HandleCode
 }
 
 type handlerListItem struct {
@@ -49,11 +49,11 @@ func (hl *handlerList) Push(x handlerListItem) {
 	sort.Sort(hl)
 }
 
-func (l *handlerList) Iterate(req *request, enc *json.Encoder, dec *json.Decoder) HandleCode {
+func (l *handlerList) Iterate(req *request, enc *json.Encoder, connCxt ConnContext) HandleCode {
 	hl := *l
 	ret := FAIL
 	for _, item := range hl {
-		ret = item.handler.Handle(req, enc, dec)
+		ret = item.handler.Handle(req, enc, connCxt)
 		if OK == ret {
 			break
 		}

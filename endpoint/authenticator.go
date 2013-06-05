@@ -5,7 +5,7 @@ import (
 )
 
 type Authenticator interface {
-	Authenticate(agentName string, agentId string, token string) HandleCode
+	Authenticate(agentName string, agentId string, token string, connCtx ConnContext) HandleCode
 }
 
 type authenticatorListItem struct {
@@ -41,11 +41,11 @@ func (l *authenticatorList) Push(x authenticatorListItem) {
 	sort.Sort(l)
 }
 
-func (l *authenticatorList) Iterate(agentName string, agentId string, token string) HandleCode {
+func (l *authenticatorList) Iterate(agentName string, agentId string, token string, connCtx ConnContext) HandleCode {
 	al := *l
 	ret := FAIL
 	for _, item := range al {
-		ret = item.authenticator.Authenticate(agentName, agentId, token)
+		ret = item.authenticator.Authenticate(agentName, agentId, token, connCtx)
 		if OK == ret {
 			break
 		}

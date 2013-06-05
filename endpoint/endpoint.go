@@ -76,7 +76,7 @@ func (e *Endpoint) serveConn(conn net.Conn, wg *sync.WaitGroup) {
 	}
 	if first[0] == '{' {
 		// writing shouldn't be buffered
-		e.hub.serveConn(newReadWriter(reader, conn))
+		e.hub.serveConn(newReadWriter(reader, conn), ConnContext{LocalAddr: conn.LocalAddr(), RemoteAddr: conn.RemoteAddr()})
 	} else {
 		logger.Printf("Got: %s; not a valid json, will pass to HTTP handler.\n", first)
 		handleUpgrade(newReadWriter(reader, conn))

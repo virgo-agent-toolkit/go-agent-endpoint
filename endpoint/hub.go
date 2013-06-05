@@ -29,8 +29,8 @@ func (h *Hub) Authenticator(authenticator Authenticator, priority int) {
 	h.authenticators.Push(constructAuthenticatorListItem(authenticator, priority))
 }
 
-func (h *Hub) serveConn(rw io.ReadWriter) {
-	if !h.authenticate(rw) {
+func (h *Hub) serveConn(rw io.ReadWriter, connCtx ConnContext) {
+	if !h.authenticate(rw, connCtx) {
 		return
 	}
 
@@ -57,13 +57,13 @@ func (h *Hub) serveConn(rw io.ReadWriter) {
 				logger.Printf("Got a request to unimplemented handler: %s\n", req.Method)
 				encoder.Encode(rsp)
 			} else {
-				handlerList.Iterate(req, encoder, decoder)
+				handlerList.Iterate(req, encoder, connCtx)
 			}
 		}
 	}
 }
 
-func (h *Hub) authenticate(rw io.ReadWriter) (authenticated bool) {
+func (h *Hub) authenticate(rw io.ReadWriter, connCtx ConnContext) (authenticated bool) {
 	encoder := json.NewEncoder(rw)
 	decoder := json.NewDecoder(rw)
 	req := new(request)
@@ -89,7 +89,7 @@ func (h *Hub) authenticate(rw io.ReadWriter) (authenticated bool) {
 	}
 	logger.Printf("got a handshake.hello from %s\n", req.Source)
 	// TODO: check process version and bundleversion
-	if OK != h.authenticators.Iterate(hl.AgentName, hl.AgentId, hl.Token) {
+	if OK != h.authenticators.Iterate(hl.AgentName, hl.AgentId, hl.Token, connCtx) {
 		rsp.Err = getErr(AuthenticationFailed)
 		logger.Printf("handshake.hello from %s failed authentication\n", req.Source)
 		return false

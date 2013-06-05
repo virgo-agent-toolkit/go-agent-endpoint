@@ -7,7 +7,7 @@ import (
 
 type HeartbeatHandler byte
 
-func (h HeartbeatHandler) Handle(req *request, encoder *json.Encoder, decoder *json.Decoder) HandleCode {
+func (h HeartbeatHandler) Handle(req *request, encoder *json.Encoder, connCtx ConnContext) HandleCode {
 	rsp := respondingTo(req)
 	var hb Heartbeat
 	err := json.Unmarshal(req.Params, &hb)

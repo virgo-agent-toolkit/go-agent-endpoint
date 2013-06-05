@@ -3,6 +3,7 @@ package endpoint
 import (
 	"encoding/json"
 	"errors"
+	"net"
 )
 
 var (
@@ -32,6 +33,11 @@ type response struct {
 	Source  string          `json:"source"`
 	Result  json.RawMessage `json:"result"`
 	Err     *Error          `json:"error"`
+}
+
+type ConnContext struct {
+	LocalAddr  net.Addr
+	RemoteAddr net.Addr
 }
 
 func respondingTo(req *request) *response {
