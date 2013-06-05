@@ -19,7 +19,7 @@ type Handler interface {
 
 type handlerListItem struct {
 	handler  Handler
-	priority int // the greater the number (priority), the earlier it should be executed
+	priority int // the lower the number, the higher the priority, i.e., the earlier it should be executed
 }
 
 func constructHandlerListItem(handler Handler, priority int) handlerListItem {
@@ -37,7 +37,7 @@ func (l *handlerList) Len() int { return len(*l) }
 
 func (l *handlerList) Less(i, j int) bool {
 	hl := *l
-	return hl[i].priority > hl[j].priority // higher priority at front
+	return hl[i].priority < hl[j].priority // lower number (higher priority) at front
 }
 
 func (l *handlerList) Swap(i, j int) {

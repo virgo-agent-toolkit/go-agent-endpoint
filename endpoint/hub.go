@@ -5,7 +5,11 @@ import (
 	"io"
 )
 
-// Hub is a wrapper to all handlers. It supports multiple handlers to a same trigger. Internally a priority queue is used determine the order in which handlers are executed. When requested, Hub tries all handlers hooked to the trigger, from priority higher to lower, until a handler properly handles the request.
+const (
+	LowestPriority = int(^uint(0) >> 1) // maximum value for int
+)
+
+// Hub is a wrapper to all handlers. It supports multiple handlers to a same trigger. Internally a priority queue is used determine the order in which handlers are executed. When requested, Hub tries all handlers hooked to the trigger, from priority number lower to higher, until a handler properly handles the request.
 type Hub struct {
 	handlers       map[string]*handlerList
 	authenticators *authenticatorList
@@ -15,11 +19,11 @@ func NewHub() *Hub {
 	ret := new(Hub)
 	ret.authenticators = newAuthenticatorList()
 	ret.handlers = make(map[string]*handlerList)
-	ret.Hook("heartbeat.post", HeartbeatHandler(0), 0)
+	ret.Hook("heartbeat.post", HeartbeatHandler(0), LowestPriority)
 	return ret
 }
 
-// Hook a handler (handler) to a method (trigger) with priority. There can be multiple handlers for the same trigger. When an rpc request on trigger is received, the hub is requested by the endpoint to iterate through handlers hooked on the trigger, starting from highest priority, until the request is (considered) properly handled.
+// Hook a handler (handler) to a method (trigger) with priority. There can be multiple handlers for the same trigger. When an rpc request on trigger is received, the hub is requested by the endpoint to iterate through handlers hooked on the trigger, starting from lowest priority number, until the request is (considered) properly handled.
 func (h *Hub) Hook(trigger string, handler Handler, priority int) {
 	if _, ok := h.handlers[trigger]; !ok {
 		h.handlers[trigger] = newHandlerList()
@@ -27,7 +31,7 @@ func (h *Hub) Hook(trigger string, handler Handler, priority int) {
 	h.handlers[trigger].Push(handlerListItem{handler: handler, priority: priority})
 }
 
-// Hook a authentication handler (authenticator) with priority. There can be multiple authentication handlers. When a new handshake is initiated, endpoint tries to authenticate the ageng. The hub is requested by the endpoint to iterate through all authenticators, starting from highest priority, until authentication succeeds or all authenticators are tried.
+// Hook a authentication handler (authenticator) with priority. There can be multiple authentication handlers. When a new handshake is initiated, endpoint tries to authenticate the ageng. The hub is requested by the endpoint to iterate through all authenticators, starting from lowest priority number, until authentication succeeds or all authenticators are tried.
 func (h *Hub) Authenticator(authenticator Authenticator, priority int) {
 	h.authenticators.Push(constructAuthenticatorListItem(authenticator, priority))
 }

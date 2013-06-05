@@ -16,7 +16,7 @@ type Authenticator interface {
 
 type authenticatorListItem struct {
 	authenticator Authenticator
-	priority      int // the greater the number (priority), the earlier it should be executed
+	priority      int // the lower the number, the higher the priority, i.e., the earlier it should be executed
 }
 
 func constructAuthenticatorListItem(authenticator Authenticator, priority int) authenticatorListItem {
@@ -34,7 +34,7 @@ func (l *authenticatorList) Len() int { return len(*l) }
 
 func (l *authenticatorList) Less(i, j int) bool {
 	al := *l
-	return al[i].priority > al[j].priority // higher priority at front
+	return al[i].priority < al[j].priority // lower number (higher priority) at front
 }
 
 func (l *authenticatorList) Swap(i, j int) {
