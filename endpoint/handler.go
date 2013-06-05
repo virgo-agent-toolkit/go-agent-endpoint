@@ -12,6 +12,7 @@ const (
 	FAIL = HandleCode(0x1)
 )
 
+// General interface to all handlers; should return OK if the request is properly handled, or FAIL if the request is not handled yet and should be passed on.
 type Handler interface {
 	Handle(*request, *json.Encoder, ConnContext) HandleCode
 }

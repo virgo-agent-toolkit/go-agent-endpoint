@@ -9,6 +9,7 @@ var (
 	AuthenticationFailed = errors.New("Authentication failed")
 )
 
+// General interface for authenticators; should return OK if the agent is authenticated, or FAIL if this authenticator can't authenticate the agen and the auth information should be passed on
 type Authenticator interface {
 	Authenticate(agentName string, agentId string, token string, connCtx ConnContext) HandleCode
 }

@@ -17,10 +17,10 @@ type Endpoint struct {
 }
 
 type EndpointConfig struct {
-	ListenAddr              string
-	UpgradingFileServerAddr string
+	ListenAddr              string // The address that the endpoint should listen on. e.g. "localhost:9999" or ":9999"
+	UpgradingFileServerAddr string // The address of the file server to which the endpoint should forward non-rpc requests. e.g. "localhost:8080"
 
-	Hub *Hub
+	Hub *Hub // The Hub that the endpoint uses to handle all requests from agents.
 }
 
 func NewEndpoint(config EndpointConfig) (endpoint *Endpoint, err error) {
@@ -32,6 +32,7 @@ func NewEndpoint(config EndpointConfig) (endpoint *Endpoint, err error) {
 	return
 }
 
+// Spin up the endpoint; start to accept connections from agents.
 func (e *Endpoint) Start() {
 	go e.once.Do(func() {
 		e.running = true
@@ -50,6 +51,7 @@ func (e *Endpoint) Start() {
 	})
 }
 
+// Stop accepting connections and wait for current jobs to finish.
 func (e *Endpoint) Destroy() {
 	e.stop <- 1
 	e.ln.Close()
