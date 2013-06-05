@@ -17,13 +17,16 @@ const (
 type Hub struct {
 	handlers       map[string]*handlerList
 	authenticators *authenticatorList
+	unhandled      *handlerList
 }
 
 func NewHub() *Hub {
 	ret := new(Hub)
 	ret.authenticators = newAuthenticatorList()
+	ret.unhandled = newHandlerList()
 	ret.handlers = make(map[string]*handlerList)
 	ret.Hook("heartbeat.post", HeartbeatHandler(0), LowestPriority)
+	ret.Unhandled(Unhandled(0), LowestPriority)
 	return ret
 }
 
@@ -39,7 +42,7 @@ func (h *Hub) Hook(trigger string, handler Handler, priority int) {
 	h.handlers[trigger].Push(handlerListItem{handler: handler, priority: priority})
 }
 
-// Hook a authentication handler (authenticator) with priority. There can be
+// Hook an authentication handler (authenticator) with priority. There can be
 // multiple authentication handlers. When a new handshake is initiated,
 // endpoint tries to authenticate the ageng. The hub is requested by the
 // endpoint to iterate through all authenticators, starting from lowest
@@ -47,6 +50,13 @@ func (h *Hub) Hook(trigger string, handler Handler, priority int) {
 // tried.
 func (h *Hub) Authenticator(authenticator Authenticator, priority int) {
 	h.authenticators.Push(constructAuthenticatorListItem(authenticator, priority))
+}
+
+// Hook an unhandled handler with priority. An unhandled handler is used when
+// no handled can handle the request. There can be multiple unhandled handlers.
+// The execution rule is similar to regular handler.
+func (h *Hub) Unhandled(handler Handler, priority int) {
+	h.unhandled.Push(handlerListItem{handler, priority})
 }
 
 func (h *Hub) serveConn(rw io.ReadWriter, connCtx ConnContext) {
@@ -72,10 +82,7 @@ func (h *Hub) serveConn(rw io.ReadWriter, connCtx ConnContext) {
 		} else {
 			handlerList, ok := h.handlers[req.Method]
 			if !ok {
-				rsp := respondingTo(req)
-				rsp.Err = getErr(NoSuchHandler)
-				logger.Printf("Got a request to unimplemented handler: %s\n", req.Method)
-				encoder.Encode(rsp)
+				h.unhandled.Iterate(req, encoder, connCtx)
 			} else {
 				handlerList.Iterate(req, encoder, connCtx)
 			}
