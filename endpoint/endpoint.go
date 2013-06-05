@@ -17,10 +17,16 @@ type Endpoint struct {
 }
 
 type EndpointConfig struct {
-	ListenAddr              string // The address that the endpoint should listen on. e.g. "localhost:9999" or ":9999"
-	UpgradingFileServerAddr string // The address of the file server to which the endpoint should forward non-rpc requests. e.g. "localhost:8080"
+	// The address that the endpoint should listen on. e.g. "localhost:9999" or
+	// ":9999"
+	ListenAddr string
 
-	Hub *Hub // The Hub that the endpoint uses to handle all requests from agents.
+	// The address of the file server to which the endpoint should forward
+	// non-rpc requests. e.g. "localhost:8080"
+	UpgradingFileServerAddr string
+
+	// The Hub that the endpoint uses to handle all requests from agents.
+	Hub *Hub
 }
 
 func NewEndpoint(config EndpointConfig) (endpoint *Endpoint, err error) {

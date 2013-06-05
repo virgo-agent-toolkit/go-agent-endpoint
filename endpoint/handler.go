@@ -12,14 +12,19 @@ const (
 	FAIL = HandleCode(0x1)
 )
 
-// General interface to all handlers; should return OK if the request is properly handled, or FAIL if the request is not handled yet and should be passed on.
+// General interface to all handlers; should return OK if the request is
+// properly handled, or FAIL if the request is not handled yet and should be
+// passed on.
 type Handler interface {
 	Handle(*request, *json.Encoder, ConnContext) HandleCode
 }
 
 type handlerListItem struct {
-	handler  Handler
-	priority int // the lower the number, the higher the priority, i.e., the earlier it should be executed
+	handler Handler
+
+	// the lower the number, the higher the priority, i.e., the earlier it should
+	// be executed
+	priority int
 }
 
 func constructHandlerListItem(handler Handler, priority int) handlerListItem {

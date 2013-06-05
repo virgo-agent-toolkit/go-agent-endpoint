@@ -9,14 +9,19 @@ var (
 	AuthenticationFailed = errors.New("Authentication failed")
 )
 
-// General interface for authenticators; should return OK if the agent is authenticated, or FAIL if this authenticator can't authenticate the agen and the auth information should be passed on
+// General interface for authenticators; should return OK if the agent is
+// authenticated, or FAIL if this authenticator can't authenticate the agen and
+// the auth information should be passed on
 type Authenticator interface {
 	Authenticate(agentName string, agentId string, token string, connCtx ConnContext) HandleCode
 }
 
 type authenticatorListItem struct {
 	authenticator Authenticator
-	priority      int // the lower the number, the higher the priority, i.e., the earlier it should be executed
+
+	// the lower the number, the higher the priority, i.e., the earlier it should
+	// be executed
+	priority int
 }
 
 func constructAuthenticatorListItem(authenticator Authenticator, priority int) authenticatorListItem {
