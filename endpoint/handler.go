@@ -7,13 +7,15 @@ import (
 type HandleCode int
 
 const (
-	OK   = HandleCode(0x0)
-	FAIL = HandleCode(0x1)
+	OK       = HandleCode(0x0)
+	DECLINED = HandleCode(0x1)
+	FAIL     = HandleCode(0x2)
 )
 
-// General interface to all handlers; should return OK if the request is
-// properly handled, or FAIL if the request is not handled yet and should be
-// passed on.
+// General interface for all handlers; should return OK if the request is
+// properly handled, DECLINED if the request is not handled yet and should be
+// passed on to next handler, or FAIL if there's an error and should stop
+// without passing on.
 type Handler interface {
 	Handle(req *Request, responder *Responder, connContext ConnContext) HandleCode
 }
@@ -56,10 +58,10 @@ func (hl *handlerList) Push(x handlerListItem) {
 
 func (l *handlerList) Iterate(req *Request, responder *Responder, connCxt ConnContext) HandleCode {
 	hl := *l
-	ret := FAIL
+	ret := DECLINED
 	for _, item := range hl {
 		ret = item.handler.Handle(req, responder, connCxt)
-		if OK == ret {
+		if OK == ret || FAIL == ret {
 			break
 		}
 	}

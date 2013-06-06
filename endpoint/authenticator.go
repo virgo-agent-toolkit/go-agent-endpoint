@@ -10,8 +10,9 @@ var (
 )
 
 // General interface for authenticators; should return OK if the agent is
-// authenticated, or FAIL if this authenticator can't authenticate the agen and
-// the auth information should be passed on
+// authenticated, DECLINED if this authenticator can't authenticate the agent
+// and the auth information should be passed on to next authenticator, or FAIL
+// if there's an error and should stop without passing on
 type Authenticator interface {
 	Authenticate(agentName string, agentId string, token string, connCtx ConnContext) HandleCode
 }
@@ -54,10 +55,10 @@ func (l *authenticatorList) Push(x authenticatorListItem) {
 
 func (l *authenticatorList) Iterate(agentName string, agentId string, token string, connCtx ConnContext) HandleCode {
 	al := *l
-	ret := FAIL
+	ret := DECLINED
 	for _, item := range al {
 		ret = item.authenticator.Authenticate(agentName, agentId, token, connCtx)
-		if OK == ret {
+		if OK == ret || FAIL == ret {
 			break
 		}
 	}
