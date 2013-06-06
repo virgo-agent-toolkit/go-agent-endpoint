@@ -11,15 +11,32 @@ var (
 	WrongVersion  = errors.New("Wrong protocol version")
 )
 
-// Low level RPC request object. Normally should not be used. Use DecodeParams
-// to retrieve parameters
+// Low level RPC request object. Normally should not be used by a controller.
+// DecodeParams should be sufficient for most cases.
 type Request struct {
 	Version string          `json:"v"`
-	Id      int             `json:"id"`
+	Id      int64           `json:"id"`
 	Target  string          `json:"target"`
 	Source  string          `json:"source"`
 	Params  json.RawMessage `json:"params"` // left intact for handlers to deal with
 	Method  string          `json:"method"`
+
+	// ugly hacks for detecting message type in bidirectional communication.
+	// default to Request because that's way more common than Response to be
+	// received on an endpoint
+	Place_holder_result json.RawMessage `json:"result"`
+	Place_holder_err    *Error          `json:"error"`
+}
+
+// Returns <true, nil> if r is a Request; returns <false, response>, where
+// response is a Response object parsed from this message, if r is a Response.
+// It's an ugly hack for detecting message type in bidirectional communication.
+func (r *Request) isRequestOrGetResponse() (isRequest bool, response *Response) {
+	if r.Method != "" {
+		return true, nil
+	} else {
+		return false, &Response{Version: r.Version, Id: r.Id, Target: r.Target, Source: r.Source, Result: r.Place_holder_result, Err: r.Place_holder_err}
+	}
 }
 
 func (r *Request) DecodeParams(v interface{}) error {
@@ -32,11 +49,11 @@ type Error struct {
 	Message string `json:"message"`
 }
 
-// Low level RPC response object. Normally should not be used. Use Responder to
-// respond to RPC calls
+// Low level RPC response object. Normally should not be used by a controller.
+// Responder should be sufficient for most cases.
 type Response struct {
 	Version string          `json:"v"`
-	Id      int             `json:"id"`
+	Id      int64           `json:"id"`
 	Target  string          `json:"target"`
 	Source  string          `json:"source"`
 	Result  json.RawMessage `json:"result"`
@@ -57,8 +74,12 @@ func GetErr(err error) *Error {
 }
 
 type Responder struct {
-	encoder *json.Encoder
-	request *Request
+	encodingChan chan<- interface{}
+	request      *Request
+}
+
+func newResponder(encodingChan chan<- interface{}, request *Request) *Responder {
+	return &Responder{encodingChan: encodingChan, request: request}
 }
 
 func (r *Responder) Respond(result interface{}, e *Error) (err error) {
@@ -68,9 +89,10 @@ func (r *Responder) Respond(result interface{}, e *Error) (err error) {
 		return err
 	}
 	rsp.Err = e
-	return r.encoder.Encode(rsp)
+	r.encodingChan <- rsp
+	return nil
 }
 
-func (r *Responder) RespondWithCustomResponse(rsp *Response) (err error) {
-	return r.encoder.Encode(rsp)
+func (r *Responder) RespondWithCustomResponse(rsp *Response) {
+	r.encodingChan <- rsp
 }

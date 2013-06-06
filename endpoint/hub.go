@@ -18,9 +18,12 @@ type Hub struct {
 	handlers       map[string]*handlerList
 	authenticators *authenticatorList
 	unhandled      *handlerList
+	newRequesters  chan *Requester
 }
 
-func NewHub() *Hub {
+// Create a Hub that support only single-directional communication from agents
+// to endpoint
+func NewSimpleHub() (hub *Hub) {
 	ret := new(Hub)
 	ret.authenticators = newAuthenticatorList()
 	ret.unhandled = newHandlerList()
@@ -28,6 +31,13 @@ func NewHub() *Hub {
 	ret.Hook("heartbeat.post", HeartbeatHandler(0), LowestPriority)
 	ret.Unhandled(Unhandled(0), LowestPriority)
 	return ret
+}
+
+// Create a Hub that supports bi-directional communication with agents
+func NewHub() (hub *Hub, newRequesters <-chan *Requester) {
+	ret := NewSimpleHub()
+	ret.newRequesters = make(chan *Requester)
+	return ret, ret.newRequesters
 }
 
 // Hook a handler (handler) to a method (trigger) with priority. There can be
@@ -60,13 +70,34 @@ func (h *Hub) Unhandled(handler Handler, priority int) {
 }
 
 func (h *Hub) serveConn(rw io.ReadWriter, connCtx ConnContext) {
-	if !h.authenticate(rw, connCtx) {
+	encodingChan := make(chan interface{})
+	go func() { // encoder worker (aggregating different messages)
+		encoder := json.NewEncoder(rw)
+		for {
+			encoder.Encode(<-encodingChan)
+		}
+	}()
+
+	authenticated, authReq := h.authenticate(rw, connCtx, encodingChan)
+	if !authenticated {
 		return
 	}
 
-	encoder := json.NewEncoder(rw)
+	var requester *Requester
+	if h.newRequesters != nil {
+		requestChan := make(chan *Request)
+		requester = newRequester(requestChan, authReq.Source, authReq.Target, authReq.Version, connCtx)
+		go func() { // requestChan --> encodingChan
+			h.newRequesters <- requester
+			for {
+				encodingChan <- <-requestChan
+			}
+		}()
+	}
+
 	decoder := json.NewDecoder(rw)
-	for {
+	for { // decoder worker
+		// Decode a message, could be response as well
 		req := new(Request)
 		err := decoder.Decode(req)
 		if err != nil {
@@ -75,51 +106,59 @@ func (h *Hub) serveConn(rw io.ReadWriter, connCtx ConnContext) {
 			}
 			break
 		}
-		if req.Version != VERSION {
-			rsp := respondingTo(req)
-			rsp.Err = GetErr(WrongVersion)
-			encoder.Encode(rsp)
+
+		// determine whether it's request or response
+		isReq, rsp := req.isRequestOrGetResponse()
+		if !isReq && requester != nil {
+			// it's a response to a request from requester, should be given back to
+			// the requester
+			requester.newResponse(rsp)
 		} else {
-			handlerList, ok := h.handlers[req.Method]
-			if !ok {
-				h.unhandled.Iterate(req, &Responder{encoder: encoder, request: req}, connCtx)
+			// it's a request; should use handlers
+			responder := newResponder(encodingChan, req)
+			if responder.request.Version != VERSION {
+				responder.Respond(nil, GetErr(WrongVersion))
 			} else {
-				handlerList.Iterate(req, &Responder{encoder: encoder, request: req}, connCtx)
+				handlerList, ok := h.handlers[responder.request.Method]
+				if !ok {
+					h.unhandled.Iterate(responder.request, responder, connCtx)
+				} else {
+					handlerList.Iterate(responder.request, responder, connCtx)
+				}
 			}
 		}
 	}
 }
 
-func (h *Hub) authenticate(rw io.ReadWriter, connCtx ConnContext) (authenticated bool) {
-	encoder := json.NewEncoder(rw)
+func (h *Hub) authenticate(rw io.Reader, connCtx ConnContext, encodingChan chan interface{}) (authenticated bool, req *Request) {
 	decoder := json.NewDecoder(rw)
-	req := new(Request)
+	req = new(Request)
 	err := decoder.Decode(req)
 	if err != nil {
-		return false
+		return false, req
 	}
-	responder := Responder{encoder: encoder, request: req}
+	responder := newResponder(encodingChan, req)
 	if req.Method != "handshake.hello" {
 		responder.Respond(nil, GetErr(AuthenticationFailed))
-		return false
+		return false, req
 	}
 	if req.Version != VERSION {
 		responder.Respond(nil, GetErr(WrongVersion))
-		return false
+		return false, req
 	}
 	var hl HelloParams
 	err = json.Unmarshal(req.Params, &hl)
 	if err != nil {
 		responder.Respond(nil, GetErr(err))
-		return false
+		return false, req
 	}
 	logger.Printf("got a handshake.hello from %s\n", req.Source)
 	// TODO: check process version and bundleversion
 	if OK != h.authenticators.Iterate(hl.AgentName, hl.AgentId, hl.Token, connCtx) {
 		responder.Respond(nil, GetErr(AuthenticationFailed))
 		logger.Printf("handshake.hello from %s failed authentication\n", req.Source)
-		return false
+		return false, req
 	}
 	responder.Respond(HelloResult{HeartbeatInterval: "1000"}, nil)
-	return true
+	return true, req
 }

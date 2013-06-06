@@ -17,7 +17,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	hub := endpoint.NewHub()
+	hub := endpoint.NewSimpleHub()
 	hub.Authenticator(endpoint.DumbAuthenticatorDontUseMe(0), 0)
 
 	config := endpoint.EndpointConfig{}
