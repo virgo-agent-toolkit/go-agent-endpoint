@@ -11,7 +11,9 @@ var (
 	WrongVersion  = errors.New("Wrong protocol version")
 )
 
-type request struct {
+// Low level RPC request object. Normally should not be used. Use DecodeParams
+// to retrieve parameters
+type Request struct {
 	Version string          `json:"v"`
 	Id      int             `json:"id"`
 	Target  string          `json:"target"`
@@ -20,13 +22,19 @@ type request struct {
 	Method  string          `json:"method"`
 }
 
+func (r *Request) DecodeParams(v interface{}) error {
+	return json.Unmarshal(r.Params, v)
+}
+
 type Error struct {
 	Field   string `json:"field"`
 	Code    int    `json:"code"`
 	Message string `json:"message"`
 }
 
-type response struct {
+// Low level RPC response object. Normally should not be used. Use Responder to
+// respond to RPC calls
+type Response struct {
 	Version string          `json:"v"`
 	Id      int             `json:"id"`
 	Target  string          `json:"target"`
@@ -40,10 +48,29 @@ type ConnContext struct {
 	RemoteAddr net.Addr
 }
 
-func respondingTo(req *request) *response {
-	return &response{Version: VERSION, Id: req.Id, Target: req.Source, Source: req.Target, Result: json.RawMessage("{}"), Err: nil}
+func respondingTo(req *Request) *Response {
+	return &Response{Version: VERSION, Id: req.Id, Target: req.Source, Source: req.Target, Result: json.RawMessage("{}"), Err: nil}
 }
 
-func getErr(err error) *Error {
+func GetErr(err error) *Error {
 	return &Error{Message: err.Error()}
+}
+
+type Responder struct {
+	encoder *json.Encoder
+	request *Request
+}
+
+func (r *Responder) Respond(result interface{}, e *Error) (err error) {
+	rsp := respondingTo(r.request)
+	rsp.Result, err = json.Marshal(result)
+	if err != nil {
+		return err
+	}
+	rsp.Err = e
+	return r.encoder.Encode(rsp)
+}
+
+func (r *Responder) RespondWithCustomResponse(rsp *Response) (err error) {
+	return r.encoder.Encode(rsp)
 }

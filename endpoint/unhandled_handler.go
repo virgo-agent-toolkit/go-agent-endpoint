@@ -1,15 +1,11 @@
 package endpoint
 
-import (
-	"encoding/json"
-)
+import ()
 
 type Unhandled byte
 
-func (h Unhandled) Handle(req *request, encoder *json.Encoder, connCtx ConnContext) HandleCode {
-	rsp := respondingTo(req)
-	rsp.Err = getErr(NoSuchHandler)
+func (h Unhandled) Handle(req *Request, responder *Responder, connCtx ConnContext) HandleCode {
+	responder.Respond(nil, GetErr(NoSuchHandler))
 	logger.Printf("Got a request to unimplemented handler: %s\n", req.Method)
-	encoder.Encode(rsp)
 	return OK
 }

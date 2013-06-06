@@ -1,23 +1,20 @@
 package endpoint
 
 import (
-	"encoding/json"
 	"time"
 )
 
 type HeartbeatHandler byte
 
-func (h HeartbeatHandler) Handle(req *request, encoder *json.Encoder, connCtx ConnContext) HandleCode {
-	rsp := respondingTo(req)
+func (h HeartbeatHandler) Handle(req *Request, responder *Responder, connCtx ConnContext) HandleCode {
 	var hb Heartbeat
-	err := json.Unmarshal(req.Params, &hb)
+	err := req.DecodeParams(&hb)
 	if err != nil {
-		rsp.Err = getErr(err)
 		logger.Printf("Unmarshaling heartbeat error: %v\n", err)
+		responder.Respond(nil, GetErr(err))
 	} else {
 		logger.Printf("Got a heartbeat: %v\n", hb.Timestamp)
-		rsp.Result, _ = Heartbeat{Timestamp: time.Now()}.MarshalJSON()
+		responder.Respond(Heartbeat{Timestamp: time.Now()}, nil)
 	}
-	encoder.Encode(rsp)
 	return OK
 }

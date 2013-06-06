@@ -67,7 +67,7 @@ func (h *Hub) serveConn(rw io.ReadWriter, connCtx ConnContext) {
 	encoder := json.NewEncoder(rw)
 	decoder := json.NewDecoder(rw)
 	for {
-		req := new(request)
+		req := new(Request)
 		err := decoder.Decode(req)
 		if err != nil {
 			if err != io.EOF {
@@ -77,14 +77,14 @@ func (h *Hub) serveConn(rw io.ReadWriter, connCtx ConnContext) {
 		}
 		if req.Version != VERSION {
 			rsp := respondingTo(req)
-			rsp.Err = getErr(WrongVersion)
+			rsp.Err = GetErr(WrongVersion)
 			encoder.Encode(rsp)
 		} else {
 			handlerList, ok := h.handlers[req.Method]
 			if !ok {
-				h.unhandled.Iterate(req, encoder, connCtx)
+				h.unhandled.Iterate(req, &Responder{encoder: encoder, request: req}, connCtx)
 			} else {
-				handlerList.Iterate(req, encoder, connCtx)
+				handlerList.Iterate(req, &Responder{encoder: encoder, request: req}, connCtx)
 			}
 		}
 	}
@@ -93,34 +93,33 @@ func (h *Hub) serveConn(rw io.ReadWriter, connCtx ConnContext) {
 func (h *Hub) authenticate(rw io.ReadWriter, connCtx ConnContext) (authenticated bool) {
 	encoder := json.NewEncoder(rw)
 	decoder := json.NewDecoder(rw)
-	req := new(request)
+	req := new(Request)
 	err := decoder.Decode(req)
 	if err != nil {
 		return false
 	}
-	rsp := respondingTo(req)
-	defer encoder.Encode(rsp)
+	responder := Responder{encoder: encoder, request: req}
 	if req.Method != "handshake.hello" {
-		rsp.Err = getErr(AuthenticationFailed)
+		responder.Respond(nil, GetErr(AuthenticationFailed))
 		return false
 	}
 	if req.Version != VERSION {
-		rsp.Err = getErr(WrongVersion)
+		responder.Respond(nil, GetErr(WrongVersion))
 		return false
 	}
 	var hl HelloParams
 	err = json.Unmarshal(req.Params, &hl)
 	if err != nil {
-		rsp.Err = getErr(err)
+		responder.Respond(nil, GetErr(err))
 		return false
 	}
 	logger.Printf("got a handshake.hello from %s\n", req.Source)
 	// TODO: check process version and bundleversion
 	if OK != h.authenticators.Iterate(hl.AgentName, hl.AgentId, hl.Token, connCtx) {
-		rsp.Err = getErr(AuthenticationFailed)
+		responder.Respond(nil, GetErr(AuthenticationFailed))
 		logger.Printf("handshake.hello from %s failed authentication\n", req.Source)
 		return false
 	}
-	rsp.Result, _ = json.Marshal(HelloResult{HeartbeatInterval: "1000"})
+	responder.Respond(HelloResult{HeartbeatInterval: "1000"}, nil)
 	return true
 }
