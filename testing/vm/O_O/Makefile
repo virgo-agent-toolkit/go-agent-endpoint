@@ -1,7 +1,6 @@
 VIRGO_DIR=/data/gopath/src/github.com/racker/go-agent-endpoint/testing/virgo
-GO_AGENT_ENDPOINT_PKG=/data/gopath/src/github.com/racker/go-agent-endpoint
 ENDPOINT_PKG=/data/gopath/src/github.com/racker/go-agent-endpoint/endpoint
-MONITORING_PKG=/data/gopath/src/github.com/racker/go-agent-endpoint/monitoring
+MONITORING_PKG=/data/gopath/src/github.com/racker/go-agent-endpoint/examples/monitoring
 
 default:
 	@echo Target: integration test_agent test_server
@@ -9,14 +8,14 @@ default:
 integration: build_endpoint_bin build_agent integration/test.pem
 	@echo
 	@echo -------------------------  Integration Test  -------------------------
-	integration/test.sh $(GO_AGENT_ENDPOINT_PKG)/go-agent-endpoint $(VIRGO_DIR)/out/Debug
+	integration/test.sh $(MONITORING_PKG)/monitoring $(VIRGO_DIR)/out/Debug
 
 integration/test.pem:
 	openssl req -x509 -newkey rsa:2048 -keyout /tmp/key.pem -out /tmp/cert.pem -days 3653 -nodes -subj '/C=/ST=/L=/O=/OU=/CN=/emailAddress=email@example.com'
 	cat /tmp/key.pem /tmp/cert.pem > integration/test.pem
 
 build_endpoint_bin:
-	cd $(GO_AGENT_ENDPOINT_PKG) && go build
+	cd $(MONITORING_PKG) && go build
 
 test_agent: build_agent
 	@echo

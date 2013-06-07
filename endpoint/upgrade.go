@@ -5,11 +5,7 @@ import (
 	"net"
 )
 
-var (
-	upgradingFileServer = "localhost:8989" // should be in config in the future
-)
-
-func handleUpgrade(rw io.ReadWriter) {
+func handleUpgrade(rw io.ReadWriter, upgradingFileServer string) {
 	conn, err := net.Dial("tcp", upgradingFileServer)
 	if err == nil {
 		go io.Copy(conn, rw)

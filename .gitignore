@@ -21,7 +21,7 @@ _testmain.go
 
 *.exe
 
-go-agent-endpoint
+examples/monitoring/monitoring
 testing/vm/O_O/go
 testing/vm/.vagrant
 *.pem
