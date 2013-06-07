@@ -2,7 +2,7 @@ package endpoint
 
 // manually entered for now; TODO: should be generated from .json files by script
 
-const (
+var (
 	FIXTURE_heartbeat_post_request = `
 {
   "v": "1",
@@ -56,4 +56,8 @@ const (
     }
   }
 `
+
+	FIXTURE_proactive_test_request = &struct {
+		Hello string `json:"hello"`
+	}{Hello: "world"}
 )
