@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# make a symbolic link to .git/hooks/pre-commit to automatic check gofmt and
+# golint
+
+if ! [[ $(which golint) ]]
+then
+  go get -u github.com/golang/lint/goling
+fi
+
+CODE_DIR=( endpoint )
+
+EXIT_CODE=0
+for dir in ${CODE_DIR[@]}
+do
+  cd $dir
+
+  if [[ $(golint .) ]]
+  then
+    echo $dir: golint found errors
+    EXIT_CODE=1
+  fi
+  if [[ $(gofmt -l .) ]]
+  then
+    echo $dir: format differs from gofmt
+    EXIT_CODE=1
+  fi
+
+  cd ..
+done
+
+exit $EXIT_CODE
