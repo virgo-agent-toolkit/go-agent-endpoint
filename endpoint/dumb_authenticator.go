@@ -1,7 +1,10 @@
 package endpoint
 
+// DumbAuthenticatorDontUseMe implements Authenticator interface; is an
+// authenticator that accepts any agent
 type DumbAuthenticatorDontUseMe byte
 
-func (auth DumbAuthenticatorDontUseMe) Authenticate(agentName string, agentId string, token string, connCtx ConnContext) HandleCode {
+// Authenticate Simply returns OK
+func (auth DumbAuthenticatorDontUseMe) Authenticate(agentName string, agentID string, token string, connCtx ConnContext) HandleCode {
 	return OK
 }

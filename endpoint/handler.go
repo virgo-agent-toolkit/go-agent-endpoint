@@ -4,18 +4,27 @@ import (
 	"sort"
 )
 
+// HandleCode is returned by handlers indicating whether/how the request has
+// been handled
 type HandleCode int
 
 const (
-	OK       = HandleCode(0x0)
+	// OK means the request is properly handled
+	OK = HandleCode(0x0)
+
+	// DECLINED means the request cannot be handled by this handler and should be
+	// passed on to the next handler if available
 	DECLINED = HandleCode(0x1)
-	FAIL     = HandleCode(0x2)
+
+	// FAIL means bad request or connection problem. The request cannot be
+	// handled and should never be passed on to the next handler.
+	FAIL = HandleCode(0x2)
 )
 
-// General interface for all handlers; should return OK if the request is
-// properly handled, DECLINED if the request is not handled yet and should be
-// passed on to next handler, or FAIL if there's an error and should stop
-// without passing on.
+// Handler is the general interface for all handlers; should return OK if the
+// request is properly handled, DECLINED if the request is not handled yet and
+// should be passed on to next handler, or FAIL if there's an error and should
+// stop without passing on.
 type Handler interface {
 	Handle(req *Request, responder *Responder, connContext ConnContext) HandleCode
 }

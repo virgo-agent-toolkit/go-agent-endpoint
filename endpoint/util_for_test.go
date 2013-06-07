@@ -7,25 +7,25 @@ import (
 	"net"
 )
 
-const FIXTURE_SERVER = "localhost:8099"
+const FIXTUREServer = "localhost:8099"
 
-var PROTOCOL_FIXTURE_PREFIX = "http://" + FIXTURE_SERVER + "/protocol/"
+var FIXTUREProtocolPrefix = "http://" + FIXTUREServer + "/protocol/"
 
-func simpleExpectingTest(c *gocheck.C, conn net.Conn, fixture_res string, fixture_rsp string) (rsp_exp, rsp_test map[string]interface{}) {
-	_, err := io.WriteString(conn, fixture_res)
+func simpleExpectingTest(c *gocheck.C, conn net.Conn, fixtureRes string, fixtureRsp string) (rspExp, rspTest map[string]interface{}) {
+	_, err := io.WriteString(conn, fixtureRes)
 	if err != io.EOF {
 		c.Assert(err, gocheck.IsNil)
 	}
 
-	err = json.Unmarshal([]byte(fixture_rsp), &rsp_exp)
+	err = json.Unmarshal([]byte(fixtureRsp), &rspExp)
 	c.Assert(err, gocheck.IsNil)
-	err = json.NewDecoder(conn).Decode(&rsp_test)
+	err = json.NewDecoder(conn).Decode(&rspTest)
 	c.Assert(err, gocheck.IsNil)
 
-	return rsp_exp, rsp_test
+	return rspExp, rspTest
 }
 
-func assertEqualMapItem(c *gocheck.C, rsp_exp map[string]interface{}, rsp_test map[string]interface{}, key string) {
-	c.Assert(rsp_exp[key], gocheck.NotNil)
-	c.Assert(rsp_exp[key], gocheck.Equals, rsp_test[key])
+func assertEqualMapItem(c *gocheck.C, rspExp map[string]interface{}, rspTest map[string]interface{}, key string) {
+	c.Assert(rspExp[key], gocheck.NotNil)
+	c.Assert(rspExp[key], gocheck.Equals, rspTest[key])
 }

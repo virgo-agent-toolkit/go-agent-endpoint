@@ -9,6 +9,7 @@ import (
 )
 
 var (
+	// RequesterDead is returned when Send() is called on a dead requester.
 	RequesterDead = errors.New("Requester is dead already. This is probably because agent has disconnected.")
 )
 
@@ -43,8 +44,15 @@ func newRequester(requestChan chan<- *Request, remote string, local string, vers
 	return ret
 }
 
-func (r *Requester) AgentName() string   { return r.remote }
-func (r *Requester) Version() string     { return r.version }
+// AgentName returns name of the agent that associates with this requester.
+func (r *Requester) AgentName() string { return r.remote }
+
+// Version returns protocol version of the agent that associates with this
+// requester.
+func (r *Requester) Version() string { return r.version }
+
+// AgentAddr returns network address of the agent that associates with this
+// requester.
 func (r *Requester) AgentAddr() net.Addr { return r.connContext.RemoteAddr }
 
 // Send a message (Request) to this agent. Returns reply, a channel that will
@@ -56,21 +64,21 @@ func (r *Requester) Send(method string, params interface{}) (reply <-chan *Respo
 	}
 
 	req := new(Request)
-	req.Place_holder_result = json.RawMessage("{}")
+	req.PlaceHolderResult = json.RawMessage("{}")
 	req.Method = method
 	req.Source = r.local
 	req.Target = r.remote
 	req.Version = r.version
 	req.Params, err = json.Marshal(params)
-	req.Id = atomic.AddInt64(&r.id, 1)
+	req.ID = atomic.AddInt64(&r.id, 1)
 	if err != nil {
 		return
 	}
 
-	reply_full := make(chan *Response, 1)
-	reply = reply_full
+	replyFull := make(chan *Response, 1)
+	reply = replyFull
 	r.mu.Lock()
-	r.respondingPath[req.Id] = reply_full
+	r.respondingPath[req.ID] = replyFull
 	r.mu.Unlock()
 
 	r.request <- req
@@ -80,8 +88,8 @@ func (r *Requester) Send(method string, params interface{}) (reply <-chan *Respo
 func (r *Requester) newResponse(response *Response) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	r.respondingPath[response.Id] <- response
-	delete(r.respondingPath, response.Id)
+	r.respondingPath[response.ID] <- response
+	delete(r.respondingPath, response.ID)
 }
 
 func (r *Requester) die() {

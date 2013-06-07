@@ -7,6 +7,8 @@ import (
 	"sync"
 )
 
+// Endpoint listens on TCP and accepts connections, either for RPC calls or
+// HTTP requests, from agents.
 type Endpoint struct {
 	config  EndpointConfig
 	ln      net.Listener
@@ -16,6 +18,7 @@ type Endpoint struct {
 	running bool
 }
 
+// EndpointConfig contains fields that are required to configure an endpoint
 type EndpointConfig struct {
 	// The address that the endpoint should listen on. e.g. "localhost:9999" or
 	// ":9999"
@@ -29,6 +32,8 @@ type EndpointConfig struct {
 	Hub *Hub
 }
 
+// NewEndpoint creates a new endpoint configured by config, or an error if
+// failed.
 func NewEndpoint(config EndpointConfig) (endpoint *Endpoint, err error) {
 	endpoint = new(Endpoint)
 	endpoint.config = config
@@ -38,7 +43,7 @@ func NewEndpoint(config EndpointConfig) (endpoint *Endpoint, err error) {
 	return
 }
 
-// Spin up the endpoint; start to accept connections from agents.
+// Start spins up the endpoint; start to accept connections from agents.
 func (e *Endpoint) Start() {
 	go e.once.Do(func() {
 		e.running = true
@@ -57,7 +62,8 @@ func (e *Endpoint) Start() {
 	})
 }
 
-// Stop accepting connections and wait for current jobs to finish.
+// Destroy stop endpoint from accepting connections and wait for current jobs
+// to finish.
 func (e *Endpoint) Destroy() {
 	e.stop <- 1
 	e.ln.Close()

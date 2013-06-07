@@ -4,8 +4,10 @@ import (
 	"time"
 )
 
+// HeartbeatHandler is a default handler for "heartbeat.post" requests
 type HeartbeatHandler byte
 
+// Handle parses a "heartbeat.post" request, and write a timestamp as response.
 func (h HeartbeatHandler) Handle(req *Request, responder *Responder, connCtx ConnContext) HandleCode {
 	var hb Heartbeat
 	err := req.DecodeParams(&hb)

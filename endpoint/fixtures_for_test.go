@@ -3,7 +3,7 @@ package endpoint
 // manually entered for now; TODO: should be generated from .json files by script
 
 var (
-	FIXTURE_heartbeat_post_request = `
+	FIXTUREHeartbeatPostRequest = `
 {
   "v": "1",
   "id": 1,
@@ -16,7 +16,7 @@ var (
 }
 `
 
-	FIXTURE_heartbeat_post_response = `
+	FIXTUREHeartbeatPostResponse = `
 {
   "v": "1",
   "id": 1,
@@ -27,7 +27,7 @@ var (
   }
 }
 `
-	FIXTURE_heartbeat_post_request_invalid_version = `
+	FIXTUREHeartbeatPostRequestInvalidVersion = `
 {
     "v": "2147483647",
     "id": 1,
@@ -40,7 +40,7 @@ var (
 }
 `
 
-	FIXTURE_handshake_hello_request = `
+	FIXTUREHandshakeHelloRequest = `
   {
     "v": "1",
     "id": 0,
@@ -49,15 +49,15 @@ var (
     "method": "handshake.hello",
     "params": {
       "token": "MYTOKEN",
-      "agent_id": "MYUID",
-      "agent_name": "Rackspace Monitoring Agent",
-      "process_version": "1.0.0",
-      "bundle_version": "1.0.0"
+      "agentId": "MYUID",
+      "agentName": "Rackspace Monitoring Agent",
+      "processVersion": "1.0.0",
+      "bundleVersion": "1.0.0"
     }
   }
 `
 
-	FIXTURE_proactive_test_request = &struct {
+	FIXTUREProactiveTestRequest = &struct {
 		Hello string `json:"hello"`
 	}{Hello: "world"}
 )

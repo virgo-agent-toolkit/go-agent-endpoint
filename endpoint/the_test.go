@@ -6,13 +6,13 @@ import (
 	"net"
 )
 
-func (s *TestSuite) init(c *gocheck.C, endpoint_addr string) (*Endpoint, <-chan *Requester, net.Conn) {
+func (s *TestSuite) init(c *gocheck.C, endpointAddr string) (*Endpoint, <-chan *Requester, net.Conn) {
 	hub, requesters := NewHub()
 	hub.Authenticator(DumbAuthenticatorDontUseMe(0), 0)
 
 	config := EndpointConfig{}
 	config.Hub = hub
-	config.ListenAddr = endpoint_addr
+	config.ListenAddr = endpointAddr
 	config.UpgradingFileServerAddr = "localhost:8080"
 
 	server, err := NewEndpoint(config)
@@ -20,51 +20,51 @@ func (s *TestSuite) init(c *gocheck.C, endpoint_addr string) (*Endpoint, <-chan 
 
 	server.Start()
 
-	conn, err := net.Dial("tcp", endpoint_addr)
+	conn, err := net.Dial("tcp", endpointAddr)
 	c.Assert(err, gocheck.IsNil)
 
-	_, rsp_test := simpleExpectingTest(c, conn, FIXTURE_handshake_hello_request, "{}")
-	c.Assert(rsp_test["error"], gocheck.IsNil)
+	_, rspTest := simpleExpectingTest(c, conn, FIXTUREHandshakeHelloRequest, "{}")
+	c.Assert(rspTest["error"], gocheck.IsNil)
 
 	return server, requesters, conn
 }
 
 func (s *TestSuite) TestHeartbeat(c *gocheck.C) {
-	endpoint_addr := "localhost:9876"
-	server, _, conn := s.init(c, endpoint_addr)
+	endpointAddr := "localhost:9876"
+	server, _, conn := s.init(c, endpointAddr)
 
-	rsp_exp, rsp_test := simpleExpectingTest(c, conn, FIXTURE_heartbeat_post_request, FIXTURE_heartbeat_post_response)
-	c.Assert(rsp_test["error"], gocheck.IsNil)
+	rspExp, rspTest := simpleExpectingTest(c, conn, FIXTUREHeartbeatPostRequest, FIXTUREHeartbeatPostResponse)
+	c.Assert(rspTest["error"], gocheck.IsNil)
 
-	assertEqualMapItem(c, rsp_exp, rsp_test, "v")
-	assertEqualMapItem(c, rsp_exp, rsp_test, "id")
-	assertEqualMapItem(c, rsp_exp, rsp_test, "source")
-	assertEqualMapItem(c, rsp_exp, rsp_test, "target")
+	assertEqualMapItem(c, rspExp, rspTest, "v")
+	assertEqualMapItem(c, rspExp, rspTest, "id")
+	assertEqualMapItem(c, rspExp, rspTest, "source")
+	assertEqualMapItem(c, rspExp, rspTest, "target")
 
-	rsp_exp, rsp_test = simpleExpectingTest(c, conn, FIXTURE_heartbeat_post_request_invalid_version, FIXTURE_heartbeat_post_response)
-	c.Assert(rsp_test["error"], gocheck.FitsTypeOf, map[string]interface{}{})
-	msg := rsp_test["error"].(map[string]interface{})["message"]
+	rspExp, rspTest = simpleExpectingTest(c, conn, FIXTUREHeartbeatPostRequestInvalidVersion, FIXTUREHeartbeatPostResponse)
+	c.Assert(rspTest["error"], gocheck.FitsTypeOf, map[string]interface{}{})
+	msg := rspTest["error"].(map[string]interface{})["message"]
 	c.Assert(msg, gocheck.NotNil)
 	c.Assert(msg, gocheck.Not(gocheck.Equals), "")
-	assertEqualMapItem(c, rsp_exp, rsp_test, "v")
+	assertEqualMapItem(c, rspExp, rspTest, "v")
 
 	conn.Close()
 	server.Destroy()
 }
 
 func (s *TestSuite) TestProactive(c *gocheck.C) {
-	endpoint_addr := "localhost:9876"
-	server, requesters, conn := s.init(c, endpoint_addr)
+	endpointAddr := "localhost:9876"
+	server, requesters, conn := s.init(c, endpointAddr)
 
 	requester := <-requesters
-	reply, err := requester.Send("proactive_test", FIXTURE_proactive_test_request)
+	reply, err := requester.Send("proactiveTest", FIXTUREProactiveTestRequest)
 	c.Assert(err, gocheck.IsNil)
 
 	var req *Request
 	err = json.NewDecoder(conn).Decode(&req)
 	c.Assert(err, gocheck.IsNil)
 
-	c.Assert(req.Method, gocheck.Equals, "proactive_test")
+	c.Assert(req.Method, gocheck.Equals, "proactiveTest")
 
 	var params map[string]interface{}
 	err = json.Unmarshal(req.Params, &params)
