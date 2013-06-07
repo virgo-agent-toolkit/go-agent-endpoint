@@ -1,4 +1,4 @@
-package monitoring
+package main
 
 import (
 	"encoding/json"
