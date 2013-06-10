@@ -6,7 +6,7 @@ var (
 	FIXTUREHeartbeatPostRequest = `
 {
   "v": "1",
-  "id": 1,
+  "id": "1",
   "source": "agentA",
   "target": "endpoint",
   "method": "heartbeat.post",
@@ -19,7 +19,7 @@ var (
 	FIXTUREHeartbeatPostResponse = `
 {
   "v": "1",
-  "id": 1,
+  "id": "1",
   "source": "endpoint",
   "target": "agentA",
   "result": {
@@ -30,7 +30,7 @@ var (
 	FIXTUREHeartbeatPostRequestInvalidVersion = `
 {
     "v": "2147483647",
-    "id": 1,
+    "id": "1",
     "source": "endpoint",
     "target": "agentA",
     "method": "heartbeat.post",
@@ -43,7 +43,7 @@ var (
 	FIXTUREHandshakeHelloRequest = `
   {
     "v": "1",
-    "id": 0,
+    "id": "0",
     "source": "agentA",
     "target": "endpoint",
     "method": "handshake.hello",
