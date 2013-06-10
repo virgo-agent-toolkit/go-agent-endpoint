@@ -1,10 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/racker/go-agent-endpoint/endpoint"
 	"log"
 	"os"
+	"time"
 )
 
 func print_usage() {
@@ -17,8 +19,14 @@ func main() {
 		os.Exit(1)
 	}
 
-	hub := endpoint.NewSimpleHub()
+	hub, requesters := endpoint.NewHub()
 	hub.Authenticator(endpoint.DumbAuthenticatorDontUseMe(0), 0)
+
+	go func() {
+		for {
+			go askForSystemInfo(<-requesters)
+		}
+	}()
 
 	config := endpoint.EndpointConfig{}
 	config.ListenAddr = os.Args[1]
@@ -32,4 +40,18 @@ func main() {
 	}
 	server.Start()
 	<-make(chan int)
+}
+
+func askForSystemInfo(requester *endpoint.Requester) {
+	for {
+		reply, err := requester.Send("system.info", nil)
+		if err != nil {
+			fmt.Println(err)
+		}
+		rsp := <-reply
+		var sysInfo systemInfoResponse
+		json.Unmarshal(rsp.Result, &sysInfo)
+		fmt.Printf("%#v\n", sysInfo)
+		time.Sleep(8 * time.Second)
+	}
 }

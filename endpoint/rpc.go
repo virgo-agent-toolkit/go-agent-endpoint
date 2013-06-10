@@ -19,7 +19,7 @@ var (
 // controller.  DecodeParams should be sufficient for most cases.
 type Request struct {
 	Version string          `json:"v"`
-	ID      int64           `json:"id"`
+	ID      string          `json:"id"`
 	Target  string          `json:"target"`
 	Source  string          `json:"source"`
 	Params  json.RawMessage `json:"params"` // left intact for handlers to deal with
@@ -59,7 +59,7 @@ type Error struct {
 // Responder should be sufficient for most cases.
 type Response struct {
 	Version string          `json:"v"`
-	ID      int64           `json:"id"`
+	ID      string          `json:"id"`
 	Target  string          `json:"target"`
 	Source  string          `json:"source"`
 	Result  json.RawMessage `json:"result"`
