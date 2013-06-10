@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net"
+	"strconv"
 	"sync"
 	"sync/atomic"
 )
@@ -17,7 +18,7 @@ var (
 // (endpoint) to agents.
 type Requester struct {
 	request        chan<- *Request
-	respondingPath map[int64]chan *Response
+	respondingPath map[string]chan *Response
 	mu             *sync.Mutex
 	dead           int32
 
@@ -32,7 +33,7 @@ func newRequester(requestChan chan<- *Request, remote string, local string, vers
 	ret := new(Requester)
 
 	ret.request = requestChan
-	ret.respondingPath = make(map[int64]chan *Response)
+	ret.respondingPath = make(map[string]chan *Response)
 	ret.mu = new(sync.Mutex)
 
 	ret.local = local
@@ -70,7 +71,7 @@ func (r *Requester) Send(method string, params interface{}) (reply <-chan *Respo
 	req.Target = r.remote
 	req.Version = r.version
 	req.Params, err = json.Marshal(params)
-	req.ID = atomic.AddInt64(&r.id, 1)
+	req.ID = strconv.FormatInt(atomic.AddInt64(&r.id, 1), 10)
 	if err != nil {
 		return
 	}
