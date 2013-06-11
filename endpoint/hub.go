@@ -76,7 +76,7 @@ func (h *Hub) serveConn(rw io.ReadWriter, connCtx ConnContext) {
 		encoder := json.NewEncoder(rw)
 		for {
 			data := <-encodingChan
-			logger.Printf("Sending to %v: %#v\n", connCtx.RemoteAddr, data)
+			logger.Printf("Sending to %v: %+q\n", connCtx.RemoteAddr, data)
 			encoder.Encode(data)
 		}
 	}()
