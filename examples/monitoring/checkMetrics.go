@@ -18,7 +18,7 @@ func (c checkMetricsHandler) Handle(req *endpoint.Request, responder *endpoint.R
 		return endpoint.FAIL
 	}
 
-	fmt.Printf("%#v\n", params)
+	fmt.Printf("%+q\n", params)
 
 	responder.Respond(0, nil)
 	return endpoint.OK

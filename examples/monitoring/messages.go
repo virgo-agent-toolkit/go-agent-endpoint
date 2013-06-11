@@ -6,12 +6,12 @@ import (
 )
 
 type check struct {
-	ID       string            `json:"id"`
-	Type     string            `json:"type"`
-	Details  map[string]string `json:"details"`
-	Period   int               `json:"period"`
-	Timeout  int               `json:"timeout"`
-	Disabled bool              `json:"disabled"`
+	ID       string      `json:"id"`
+	Type     string      `json:"type"`
+	Details  interface{} `json:"details"`
+	Period   int         `json:"period"`
+	Timeout  int         `json:"timeout"`
+	Disabled bool        `json:"disabled"`
 }
 
 type checkScheduleGetResult struct {
