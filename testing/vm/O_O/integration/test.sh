@@ -14,9 +14,4 @@ cmd2="$endpoint_bin ':50050' 'localhost:8989'"
 cmd3="sudo $agent_out/rackspace-monitoring-agent -i --debug --zip $agent_out/virgo-bundle.zip --config /tmp/cfg"
 cmd4="mkdir -p /tmp/upgrading && cd /tmp/upgrading && python2.7 -m SimpleHTTPServer 8989"
 
-pingpong -log "/data/O_O/logs/$(date)" -- "$cmd1" "$cmd2" "$cmd3" "$cmd4"   &
-pid=$?
-
-sleep 32
-kill $pid
-exit 0
+pingpong -log "/data/O_O/logs/$(date)" -- "$cmd1" "$cmd2" "$cmd3" "$cmd4"

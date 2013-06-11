@@ -1,32 +1,28 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/racker/go-agent-endpoint/endpoint"
 	"log"
 	"os"
-	"time"
 )
 
-func print_usage() {
+func printUsage() {
 	fmt.Printf("Usage: %s laddr upgradingServerAddr\n", os.Args[0])
 }
 
 func main() {
 	if len(os.Args) < 2 {
-		print_usage()
+		printUsage()
 		os.Exit(1)
 	}
 
 	hub, requesters := endpoint.NewHub()
-	hub.Authenticator(endpoint.DumbAuthenticatorDontUseMe(0), 0)
+	hub.Authenticator(authenticator(0), 0)
+	hub.Hook("check_schedule.get", checkScheduleHandler(0), 0)
+	hub.Hook("check_metrics.post", checkMetricsHandler(0), 0)
 
-	go func() {
-		for {
-			go askForSystemInfo(<-requesters)
-		}
-	}()
+	go proactive(requesters)
 
 	config := endpoint.EndpointConfig{}
 	config.ListenAddr = os.Args[1]
@@ -35,23 +31,9 @@ func main() {
 
 	server, err := endpoint.NewEndpoint(config)
 	if err != nil {
-		print_usage()
+		printUsage()
 		log.Fatalln(err)
 	}
 	server.Start()
 	<-make(chan int)
-}
-
-func askForSystemInfo(requester *endpoint.Requester) {
-	for {
-		reply, err := requester.Send("system.info", nil)
-		if err != nil {
-			fmt.Println(err)
-		}
-		rsp := <-reply
-		var sysInfo systemInfoResponse
-		json.Unmarshal(rsp.Result, &sysInfo)
-		fmt.Printf("%#v\n", sysInfo)
-		time.Sleep(8 * time.Second)
-	}
 }
