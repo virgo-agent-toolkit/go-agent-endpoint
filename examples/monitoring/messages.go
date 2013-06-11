@@ -5,8 +5,8 @@ import (
 	"github.com/racker/go-agent-endpoint/endpoint"
 )
 
-type Check struct {
-	Id       string            `json:"id"`
+type check struct {
+	ID       string            `json:"id"`
 	Type     string            `json:"type"`
 	Details  map[string]string `json:"details"`
 	Period   int               `json:"period"`
@@ -14,35 +14,37 @@ type Check struct {
 	Disabled bool              `json:"disabled"`
 }
 
-type CheckScheduleGetResult struct {
-	Checks []Check `json:"checks"`
+type checkScheduleGetResult struct {
+	Checks []check `json:"checks"`
 }
 
-type Metric struct {
+type metric struct {
 	Type  string `json:"t"`
 	Value string `json:"v"`
 	Unit  string `json:"u"`
 }
 
-type MetricGroup struct {
+type metricGroup struct {
 	Prefix  string
-	Metrics map[string]*Metric
+	Metrics map[string]*metric
 }
 
-type CheckMetricsPostParams struct {
-	CheckId   string        `json:"check_id"`
+type checkMetricsPostParams struct {
+	CheckID   string        `json:"check_id"`
 	CheckType string        `json:"check_type"`
 	State     string        `json:"state"`
 	Status    string        `json:"status"`
-	Metrics   []MetricGroup `json:"metrics"`
+	Metrics   []metricGroup `json:"metrics"`
 }
 
-func (g MetricGroup) MarshalJSON() (js []byte, err error) {
+// MarshalJSON marshals a metricGroup (g) into valid json bytes
+func (g metricGroup) MarshalJSON() (js []byte, err error) {
 	js, err = json.Marshal([2]interface{}{g.Prefix, g.Metrics})
 	return
 }
 
-func (g *MetricGroup) UnmarshalJSON(data []byte) error {
+// UnmarshalJSON unmarshals valid json bytes into g.
+func (g *metricGroup) UnmarshalJSON(data []byte) error {
 	if g == nil {
 		return endpoint.NilPointerError
 	}

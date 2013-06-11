@@ -8,7 +8,7 @@ then
   go get -u github.com/golang/lint/goling
 fi
 
-CODE_DIR=( endpoint )
+CODE_DIR=( endpoint examples )
 
 EXIT_CODE=0
 for dir in ${CODE_DIR[@]}

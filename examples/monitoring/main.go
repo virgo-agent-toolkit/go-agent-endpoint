@@ -7,13 +7,13 @@ import (
 	"os"
 )
 
-func print_usage() {
+func printUsage() {
 	fmt.Printf("Usage: %s laddr upgradingServerAddr\n", os.Args[0])
 }
 
 func main() {
 	if len(os.Args) < 2 {
-		print_usage()
+		printUsage()
 		os.Exit(1)
 	}
 
@@ -31,7 +31,7 @@ func main() {
 
 	server, err := endpoint.NewEndpoint(config)
 	if err != nil {
-		print_usage()
+		printUsage()
 		log.Fatalln(err)
 	}
 	server.Start()
