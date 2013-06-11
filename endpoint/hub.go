@@ -75,7 +75,9 @@ func (h *Hub) serveConn(rw io.ReadWriter, connCtx ConnContext) {
 	go func() { // encoder worker (aggregating different messages)
 		encoder := json.NewEncoder(rw)
 		for {
-			encoder.Encode(<-encodingChan)
+			data := <-encodingChan
+			logger.Printf("Sending to %v: %#v\n", connCtx.RemoteAddr, data)
+			encoder.Encode(data)
 		}
 	}()
 
