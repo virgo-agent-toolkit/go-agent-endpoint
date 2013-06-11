@@ -155,11 +155,10 @@ func (h *Hub) authenticate(rw io.Reader, connCtx ConnContext, encodingChan chan 
 	}
 	logger.Printf("got a handshake.hello from %s\n", req.Source)
 	// TODO: check process version and bundleversion
-	if OK != h.authenticators.Iterate(hl.AgentName, hl.AgentID, hl.Token, connCtx) {
+	if OK != h.authenticators.Iterate(hl.AgentName, hl.AgentID, hl.Token, responder, connCtx) {
 		responder.Respond(nil, GetErr(AuthenticationFailed))
 		logger.Printf("handshake.hello from %s failed authentication\n", req.Source)
 		return false, req
 	}
-	responder.Respond(HelloResult{HeartbeatInterval: "1000"}, nil)
 	return true, req
 }

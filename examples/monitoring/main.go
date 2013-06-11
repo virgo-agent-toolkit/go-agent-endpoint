@@ -19,7 +19,7 @@ func main() {
 	}
 
 	hub, requesters := endpoint.NewHub()
-	hub.Authenticator(endpoint.DumbAuthenticatorDontUseMe(0), 0)
+	hub.Authenticator(authenticator(0), 0)
 
 	go func() {
 		for {
