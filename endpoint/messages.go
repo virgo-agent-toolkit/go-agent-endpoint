@@ -55,11 +55,6 @@ type HelloParams struct {
 	BundleVersion  string `json:"bundle_version"`
 }
 
-// HelloResult is the Result for handshake.hello response
-type HelloResult struct {
-	HeartbeatInterval string `json:"heartbeat_interval"`
-}
-
 // GetVersionResult is the Result for get_version responses
 type GetVersionResult struct {
 	Version string `json:"version"`

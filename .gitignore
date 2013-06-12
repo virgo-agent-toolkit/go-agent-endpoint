@@ -21,6 +21,8 @@ _testmain.go
 
 *.exe
 
+*.!sync
+
 examples/monitoring/monitoring
 testing/vm/O_O/go
 testing/vm/.vagrant

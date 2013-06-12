@@ -48,22 +48,20 @@ type siNetIFInfo struct {
 	Netmask     net.IPMask       `json:"netmask"`
 }
 
-type _helper_siNetIFInfo struct {
-	Metric      int    `json:"metric"`
-	MTU         int    `json:"mtu"`
-	Flags       int    `json:"flags"`
-	Type        string `json:"type"`
-	Name        string `json:"name"`
-	Broadcast   string `json:"broadcast"`
-	Address     string `json:"address"`
-	Address6    string `json:"address6"`
-	HWAddr      string `json:"hwaddr"`
-	Destination string `json:"destination"`
-	Netmask     string `json:"netmask"`
-}
-
 func (i *siNetIFInfo) UnmarshalJSON(data []byte) (err error) {
-	var tmp _helper_siNetIFInfo
+	var tmp struct {
+		Metric      int    `json:"metric"`
+		MTU         int    `json:"mtu"`
+		Flags       int    `json:"flags"`
+		Type        string `json:"type"`
+		Name        string `json:"name"`
+		Broadcast   string `json:"broadcast"`
+		Address     string `json:"address"`
+		Address6    string `json:"address6"`
+		HWAddr      string `json:"hwaddr"`
+		Destination string `json:"destination"`
+		Netmask     string `json:"netmask"`
+	}
 	err = json.Unmarshal(data, &tmp)
 	if err != nil {
 		return
