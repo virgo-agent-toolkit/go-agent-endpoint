@@ -6,11 +6,11 @@ import (
 	"github.com/racker/go-agent-endpoint/endpoint"
 )
 
-type checkMetricsHandler byte
+type checkMetricsPrintHandler byte
 
 // Handle parses to check_metrics.post requests and print out the posted
-// metrics
-func (c checkMetricsHandler) Handle(req *endpoint.Request, responder *endpoint.Responder, connCtx endpoint.ConnContext) endpoint.HandleCode {
+// metrics; it does not finalize (responde to) the request
+func (c checkMetricsPrintHandler) Handle(req *endpoint.Request, responder *endpoint.Responder, connCtx endpoint.ConnContext) endpoint.HandleCode {
 	var params checkMetricsPostParams
 	err := json.Unmarshal(req.Params, &params)
 	if err != nil { // parsing failed, should not go on
@@ -20,6 +20,5 @@ func (c checkMetricsHandler) Handle(req *endpoint.Request, responder *endpoint.R
 
 	fmt.Printf("%+q\n", params)
 
-	responder.Respond(0, nil)
-	return endpoint.OK
+	return endpoint.DECLINED // not finalized; other handler may need the data
 }
