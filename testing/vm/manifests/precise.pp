@@ -58,7 +58,7 @@ exec { "install_pingpong":
 
 file { '/home/vagrant/.profile':
   ensure => file,
-  content => template('/vagrant/manifests/templates/profile.erb'),
+  content => template('/data/gopath/src/github.com/racker/go-agent-endpoint/testing/vm/manifests/templates/profile.erb'),
 }
 
 exec { "repo_init":
