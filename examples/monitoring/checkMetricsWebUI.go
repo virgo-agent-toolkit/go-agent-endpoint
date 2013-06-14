@@ -120,16 +120,6 @@ func (c checkMetricsWebUIHandler) multiplex(param *checkMetricsPostParams, sourc
 			}
 		}
 	}
-	for _, rsp := range rsps {
-		rsp.AgentName = "FAKE: " + source
-		for clientID, client := range c.webClients {
-			rsp.ClientID = clientID
-			select {
-			case client <- rsp:
-			default:
-			}
-		}
-	}
 	c.webClientsMu.RUnlock()
 }
 
@@ -153,7 +143,7 @@ func (c *checkMetricsWebUIHandler) webHandleData(writer http.ResponseWriter, req
 		hash.Write([]byte(time.Now().String()))
 		clientID = fmt.Sprintf("%x", hash.Sum(nil))
 		c.webClientsMu.Lock()
-		c.webClients[clientID] = make(chan webRsp, 2)
+		c.webClients[clientID] = make(chan webRsp, 64)
 		c.webClientsMu.Unlock()
 	}
 	fmt.Println(clientID)
