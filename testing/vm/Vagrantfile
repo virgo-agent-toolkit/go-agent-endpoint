@@ -8,6 +8,8 @@ Vagrant::Config.run do |config|
 
   config.vm.network :hostonly, "33.33.33.10"
 
+  config.vm.forward_port 8088, 8088
+
   config.vm.provision :puppet do |puppet|
     puppet.manifests_path = "manifests"
     puppet.manifest_file  = "precise.pp"
