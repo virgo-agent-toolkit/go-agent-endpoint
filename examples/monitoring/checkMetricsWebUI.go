@@ -20,13 +20,13 @@ type checkMetricsWebUIHandler struct {
 	webDir       string
 	webClients   map[string]chan webRsp
 	webClientsMu *sync.RWMutex
-	agentName    string
 }
 
 type webRsp struct {
-	ClientID string
-	Data     float64
-	Name     string
+	ClientID  string
+	Data      float64
+	Name      string
+	AgentName string
 }
 
 func newCheckMetricsWebUIHandler(laddr string) *checkMetricsWebUIHandler {
@@ -104,13 +104,24 @@ func checkMetricsWebUIGetWebRsp(param *checkMetricsPostParams) ([]webRsp, bool) 
 	}
 }
 
-func (c checkMetricsWebUIHandler) multiplex(param *checkMetricsPostParams) {
+func (c checkMetricsWebUIHandler) multiplex(param *checkMetricsPostParams, source string) {
 	rsps, ok := checkMetricsWebUIGetWebRsp(param)
 	if !ok {
 		return
 	}
 	c.webClientsMu.RLock()
 	for _, rsp := range rsps {
+		rsp.AgentName = source
+		for clientID, client := range c.webClients {
+			rsp.ClientID = clientID
+			select {
+			case client <- rsp:
+			default:
+			}
+		}
+	}
+	for _, rsp := range rsps {
+		rsp.AgentName = "FAKE: " + source
 		for clientID, client := range c.webClients {
 			rsp.ClientID = clientID
 			select {
@@ -123,18 +134,13 @@ func (c checkMetricsWebUIHandler) multiplex(param *checkMetricsPostParams) {
 }
 
 func (c *checkMetricsWebUIHandler) Handle(req *endpoint.Request, responder *endpoint.Responder, connCtx endpoint.ConnContext) endpoint.HandleCode {
-	if c.agentName == "" {
-		c.agentName = req.Source
-	} else if c.agentName != req.Source {
-		return endpoint.DECLINED
-	}
 	params := new(checkMetricsPostParams)
 	err := json.Unmarshal(req.Params, params)
 	if err != nil { // parsing failed, should not go on
 		fmt.Printf("parsing check_metrics.post Params failed: %v\n", err)
 		return endpoint.FAIL
 	}
-	c.multiplex(params)
+	c.multiplex(params, req.Source)
 	return endpoint.DECLINED
 }
 

@@ -219,3 +219,9 @@ h1, h2 {
   opacity: .2;
   z-index: 2;
 }
+
+.agent_title {
+  margin-top: 64px;
+  margin-bottom: 16px;
+  text-align: center;
+  font-size: 24pt;
