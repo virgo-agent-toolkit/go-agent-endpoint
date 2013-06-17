@@ -87,7 +87,7 @@ func (e *Endpoint) serveConn(conn net.Conn, wg *sync.WaitGroup) {
 	if err != nil {
 		return
 	}
-	if first[0] == '{' {
+	if first[0] == '{' || first[0] == '[' {
 		// writing shouldn't be buffered
 		e.config.Hub.serveConn(newReadWriter(reader, conn), ConnContext{LocalAddr: conn.LocalAddr(), RemoteAddr: conn.RemoteAddr()})
 	} else {
