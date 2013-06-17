@@ -37,5 +37,5 @@ func main() {
 		log.Fatalln(err)
 	}
 	server.Start()
-	<-make(chan int)
+	select {}
 }
