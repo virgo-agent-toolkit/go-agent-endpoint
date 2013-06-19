@@ -23,18 +23,17 @@ Ctl.prototype.init_agent = function(agentName) {
 };
 
 Ctl.prototype.poll = function(clientID) {
-  var self = this;
   d3.json("/data?clientID=" + clientID, function(data) {
-    if (!self.agents[data.AgentName]) {
-      self.init_agent(data.AgentName);
+    if (!this.agents[data.AgentName]) {
+      this.init_agent(data.AgentName);
     }
-    self.agents[data.AgentName][data.Name].data[self.agents[data.AgentName][data.Name].next] = {
+    this.agents[data.AgentName][data.Name].data[this.agents[data.AgentName][data.Name].next] = {
       time: new Date().getTime(),
       value: data.Data
     };
-    self.agents[data.AgentName][data.Name].next = index_plus(self.agents[data.AgentName][data.Name].next, self.cache_num, 1);
-    self.poll(data.ClientID);
-  });
+    this.agents[data.AgentName][data.Name].next = index_plus(this.agents[data.AgentName][data.Name].next, this.cache_num, 1);
+    this.poll(data.ClientID);
+  }.bind(this));
 };
 
 function index_minus(original, count, offset) {
@@ -52,34 +51,32 @@ function index_plus(original, count, offset) {
 }
 
 Ctl.prototype.get_metric = function(agent, metric_name) {
-  var self = this;
   return this.context.metric(function(start, stop, step, callback) {
     var num = (stop - start) / step;
-    if (num > self.cache_num) {
+    if (num > this.cache_num) {
       callback(new Error("Too many values requested"));
       return;
     }
-    var last = index_minus(agent[metric_name].next, self.cache_num, 1);
+    var last = index_minus(agent[metric_name].next, this.cache_num, 1);
     for (var i = 0; agent[metric_name].data[last].time > stop; i++) {
-      if (i == self.cache_num) {
+      if (i == this.cache_num) {
         callback(new Error("Data for the time period is not available"));
         return;
       }
-      last = index_minus(last, self.cache_num, 1);
+      last = index_minus(last, this.cache_num, 1);
     }
     var ret = [];
-    for (var i = index_minus(last, self.cache_num, num); ret.length < num; i = index_plus(i, self.cache_num, 1)) {
+    for (var i = index_minus(last, this.cache_num, num); ret.length < num; i = index_plus(i, this.cache_num, 1)) {
       ret.push(agent[metric_name].data[i].value);
     }
     callback(null, ret);
-  }, metric_name);
+  }.bind(this), metric_name);
 };
 
 Ctl.prototype.new_agent_graph = function(agentName) {
-  var self = this;
   var cubism_metrics = [];
-  for (var i = 0; i < self.metric_names.length; i++) {
-    cubism_metrics.push(self.get_metric(self.agents[agentName], self.metric_names[i]));
+  for (var i = 0; i < this.metric_names.length; i++) {
+    cubism_metrics.push(this.get_metric(this.agents[agentName], this.metric_names[i]));
   }
 
   d3.select("#agents").call(function(agentDiv) {
@@ -90,23 +87,23 @@ Ctl.prototype.new_agent_graph = function(agentName) {
 
     div.append("div")
     .attr("class", "axis")
-    .call(self.context.axis().orient("top"));
+    .call(this.context.axis().orient("top"));
 
     div.selectAll(".horizon")
     .data(cubism_metrics)
     .enter().append("div")
     .attr("class", "horizon")
-    .call(self.context.horizon().extent(null));
+    .call(this.context.horizon().extent(null));
 
     div.append("div")
     .attr("class", "rule")
-    .call(self.context.rule());
+    .call(this.context.rule());
 
-  });
+  }.bind(this));
 
-  self.context.on("focus", function(i) {
+  this.context.on("focus", function(i) {
     d3.selectAll(".value")
-    .style("right", i == null ? null : self.context.size() - i + "px");
+    .style("right", i == null ? null : this.context.size() - i + "px");
   });
 
 };
