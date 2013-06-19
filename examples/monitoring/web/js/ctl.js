@@ -118,7 +118,7 @@ Ctl.prototype.new_agent_graph = function(agentName) {
   this.context.on('focus', function(i) {
     d3.selectAll('.value')
     .style('right', i == null ? null : this.context.size() - i + 'px');
-  });
+  }.bind(this));
 
 };
 
