@@ -25,6 +25,7 @@ func main() {
 	hub.Hook("check_metrics.post", checkMetricsFinalizeHandler(0), 8)
 
 	go proactive(requesters)
+	go httpServer(os.Args[2])
 
 	config := endpoint.EndpointConfig{}
 	config.ListenAddr = os.Args[1]
