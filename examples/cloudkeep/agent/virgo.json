@@ -1,0 +1,22 @@
+{
+  "PKG_NAME": "cloudkeep-agent",
+  "SHORT_DESCRIPTION": "Cloudkeep Agent",
+  "SHORT_NAME": "Cloudkeep Agent",
+  "DOCUMENTATION_LINK": "http://github.com/cloudkeep/barbican",
+  "REPO": "https://github.com/racker/go-agent-endpoint",
+  "LICENSE": "Apache-2.0",
+  "AUTHOR": "Rackspace Hosting, Inc.",
+  "EMAIL": "song.gao@rackspace.com",
+  "MAINTAINER": "Song Gao <song.gao@rackspace.com>",
+  "LONG_DESCRIPTION": "cloudkeep-agent is an agent for cloudkeep service that provide applications access to keys saved on barbican server.",
+  "WIN_PRODUCT_DESCRIPTION": "cloudkeep-agent is an agent for cloudkeep service that provide applications access to keys saved on barbican server.",
+  "CHANGELOG": [
+    {
+      "version": "0.0.1-1",
+      "date": "2013-07-09 10:33:00 -0800",
+      "changes": [
+        "hello world"
+      ]
+    }
+  ]
+}

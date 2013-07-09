@@ -1,3 +1,6 @@
 [submodule "testing/virgo"]
 	path = testing/virgo
 	url = git://github.com/racker/virgo.git
+[submodule "examples/cloudkeep/agent/base"]
+	path = examples/cloudkeep/agent/base
+	url = git://github.com/racker/virgo-base
