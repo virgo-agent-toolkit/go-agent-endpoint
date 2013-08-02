@@ -1,0 +1,22 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant::Config.run do |config|
+
+  config.vm.box = "precise64"
+  config.vm.box_url = "http://files.vagrantup.com/precise64.box"
+
+  config.vm.network :hostonly, "33.3.33.10"
+
+  config.vm.forward_port 8088, 8088
+
+  config.vm.provision :puppet do |puppet|
+    puppet.manifests_path = "manifests"
+    puppet.manifest_file  = "precise.pp"
+  end
+
+  #config.vm.provision :shell, :path => "provision.sh"
+
+  config.vm.share_folder("endpoint", "/data/gopath/src/github.com/racker/go-agent-endpoint", "../../../..", :nfs => true)
+
+end
