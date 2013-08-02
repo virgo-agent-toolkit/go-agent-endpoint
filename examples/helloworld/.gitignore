@@ -1,0 +1,5 @@
+agent/out
+testing/vm/.vagrant
+testing/vm/O_O/go
+testing/vm/O_O/logs
+.nfs*

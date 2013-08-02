@@ -1,0 +1,7 @@
+#!/usr/bin/env python
+
+import base.configure
+
+if __name__ == "__main__":
+    base.configure.submodule_update_init()
+    base.configure.main("bundle.list")

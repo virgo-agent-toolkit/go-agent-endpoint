@@ -1,0 +1,22 @@
+{
+  "PKG_NAME": "helloworld-agent",
+  "SHORT_DESCRIPTION": "Helloworld Agent",
+  "SHORT_NAME": "Helloworld Agent",
+  "DOCUMENTATION_LINK": "http://github.com/racker/go-agent-endpoint",
+  "REPO": "https://github.com/racker/go-agent-endpoint",
+  "LICENSE": "Apache-2.0",
+  "AUTHOR": "Rackspace Hosting, Inc.",
+  "EMAIL": "song.gao@rackspace.com",
+  "MAINTAINER": "Song Gao <song.gao@rackspace.com>",
+  "LONG_DESCRIPTION": ".",
+  "WIN_PRODUCT_DESCRIPTION": ".",
+  "CHANGELOG": [
+    {
+      "version": "0.0.1-1",
+      "date": "2013-07-22 10:33:00 -0800",
+      "changes": [
+        "hello world"
+      ]
+    }
+  ]
+}
