@@ -1,6 +1,6 @@
-VIRGO_DIR=/data/gopath/src/github.com/racker/go-agent-endpoint/testing/virgo
-ENDPOINT_PKG=/data/gopath/src/github.com/racker/go-agent-endpoint/endpoint
-MONITORING_PKG=/data/gopath/src/github.com/racker/go-agent-endpoint/examples/monitoring
+VIRGO_DIR=/data/gopath/src/github.com/virgo-agent-toolkit/go-agent-endpoint/testing/virgo
+ENDPOINT_PKG=/data/gopath/src/github.com/virgo-agent-toolkit/go-agent-endpoint/endpoint
+MONITORING_PKG=/data/gopath/src/github.com/virgo-agent-toolkit/go-agent-endpoint/examples/monitoring
 
 default:
 	@echo Target: integration test_agent test_server

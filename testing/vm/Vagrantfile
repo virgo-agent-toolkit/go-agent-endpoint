@@ -17,6 +17,6 @@ Vagrant::Config.run do |config|
 
   #config.vm.provision :shell, :path => "provision.sh"
 
-  config.vm.share_folder("endpoint", "/data/gopath/src/github.com/racker/go-agent-endpoint", "../..", :nfs => true)
+  config.vm.share_folder("endpoint", "/data/gopath/src/github.com/virgo-agent-toolkit/go-agent-endpoint", "../..", :nfs => true)
 
 end
