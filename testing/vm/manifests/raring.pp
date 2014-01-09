@@ -60,3 +60,8 @@ file { '/home/vagrant/.profile':
   ensure => file,
   content => template('/data/gopath/src/github.com/virgo-agent-toolkit/go-agent-endpoint/testing/vm/manifests/templates/profile.erb'),
 }
+
+exec { "repo_init":
+  command => '/bin/bash -c "cd /data/gopath/src/github.com/virgo-agent-toolkit/go-agent-endpoint && git submodule update --init --recursive"',
+  require => [ Package['git'] ],
+}
