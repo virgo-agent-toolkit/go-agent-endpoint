@@ -8,14 +8,14 @@ package { ["vim", "curl", "git", "bzr", "make", "g++", "gcc", "stud" ]:
   ensure => present,
 }
 
-file { ['/data/gopath', '/data/gopath/src', '/data/gopath/src/github.com', '/data/gopath/src/github.com/racker']:
+file { ['/data/gopath', '/data/gopath/src', '/data/gopath/src/github.com', '/data/gopath/src/github.com/racker', '/data/gopath/src/github.com/virgo-agent-toolkit']:
   ensure => "directory",
   owner => "vagrant",
   group => "vagrant",
 }
 
 exec { "O_O":
-  command => "/bin/mkdir -p /data/O_O && /bin/mount --bind /data/gopath/src/github.com/racker/go-agent-endpoint/testing/vm/O_O /data/O_O",
+  command => "/bin/mkdir -p /data/O_O && /bin/mount --bind /data/gopath/src/github.com/virgo-agent-toolkit/go-agent-endpoint/testing/vm/O_O /data/O_O",
   creates => "/data/O_O/conf",
 }
 
@@ -58,10 +58,10 @@ exec { "install_pingpong":
 
 file { '/home/vagrant/.profile':
   ensure => file,
-  content => template('/data/gopath/src/github.com/racker/go-agent-endpoint/testing/vm/manifests/templates/profile.erb'),
+  content => template('/data/gopath/src/github.com/virgo-agent-toolkit/go-agent-endpoint/testing/vm/manifests/templates/profile.erb'),
 }
 
 exec { "repo_init":
-  command => '/bin/bash -c "cd /data/gopath/src/github.com/racker/go-agent-endpoint && git submodule update --init --recursive"',
+  command => '/bin/bash -c "cd /data/gopath/src/github.com/virgo-agent-toolkit/go-agent-endpoint && git submodule update --init --recursive"',
   require => [ Package['git'] ],
 }
