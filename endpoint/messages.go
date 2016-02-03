@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	// UnmarshalFieldError is an error occured when unmarshaling json object,
+	// UnmarshalFieldError is an error occurred when unmarshaling json object,
 	// mostly due to missing of field(s).
 	UnmarshalFieldError = errors.New("Unmarshal field error")
 
